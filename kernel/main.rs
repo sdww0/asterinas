@@ -14,6 +14,7 @@ pub fn main() -> ! {
     aster_frame::init();
     early_println!("[kernel] finish init aster_frame");
     component::init_all(component::parse_metadata!()).unwrap();
-    aster_std::init();
-    aster_std::run_first_process();
+    // aster_std::init();
+    // aster_std::run_first_process();
+    loop {}
 }

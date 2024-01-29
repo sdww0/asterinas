@@ -47,6 +47,7 @@ members = [
     "services/comps/network",
     "services/comps/time",
     "services/comps/virtio",
+    "services/comps/driver-example",
     "services/libs/cpio-decoder",
     "services/libs/int-to-c-enum",
     "services/libs/int-to-c-enum/derive",
