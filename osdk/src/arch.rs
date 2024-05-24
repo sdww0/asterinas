@@ -48,7 +48,7 @@ impl Arch {
         match self {
             Arch::Aarch64 => "qemu-system-aarch64",
             Arch::RiscV64 => "qemu-system-riscv64",
-            Arch::X86_64 => "qemu-system-x86_64",
+            Arch::X86_64 => "/usr/local/bin/qemu-system-x86_64",
         }
     }
 

@@ -199,8 +199,8 @@ impl Bundle {
             ActionChoice::Run => &config.run,
             ActionChoice::Test => &config.test,
         };
-        let mut qemu_cmd = Command::new(&action.qemu.path);
-
+        let mut qemu_cmd = Command::new("sudo");
+        qemu_cmd.arg(&action.qemu.path);
         qemu_cmd.current_dir(&config.work_dir);
 
         match action.boot.method {
@@ -259,7 +259,7 @@ impl Bundle {
             }
         }
 
-        info!("Running QEMU: {:#?}", qemu_cmd);
+        println!("Running QEMU: {:#?}", qemu_cmd);
 
         let exit_status = qemu_cmd.status().unwrap();
 

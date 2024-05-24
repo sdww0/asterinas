@@ -37,6 +37,8 @@ CARGO_OSDK_ARGS += --init-args="/regression/boot_hello.sh"
 else ifeq ($(AUTO_TEST), vsock)
 export VSOCK=1
 CARGO_OSDK_ARGS += --init-args="/regression/run_vsock_test.sh"
+else ifeq ($(AUTO_TEST), benchmark)
+CARGO_OSDK_ARGS += --init-args="unixbench-test.sh"
 endif
 
 ifeq ($(RELEASE_LTO), 1)

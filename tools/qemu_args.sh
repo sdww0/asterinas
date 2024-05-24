@@ -13,7 +13,7 @@ RAND_PORT_NUM2=$(shuf -i 1024-65535 -n 1)
 echo "[$1] Forwarded QEMU guest port: $RAND_PORT_NUM1->22; $RAND_PORT_NUM2->8080" 1>&2
 
 COMMON_QEMU_ARGS="\
-    -cpu Icelake-Server,+x2apic \
+    -cpu host \
     -smp ${SMP:-1} \
     -m ${MEM:-8G} \
     --no-reboot \
