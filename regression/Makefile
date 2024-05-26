@@ -36,6 +36,7 @@ $(INITRAMFS)/lib/x86_64-linux-gnu: | $(VDSO_DIR)
 	@mkdir -p $@
 	@cp -L /lib/x86_64-linux-gnu/libc.so.6 $@
 	@cp -L /lib/x86_64-linux-gnu/libstdc++.so.6 $@
+	@cp -L /lib/x86_64-linux-gnu/librt.so.1 $@
 	@cp -L /lib/x86_64-linux-gnu/libm.so.6 $@
 	@cp -L /lib/x86_64-linux-gnu/libgcc_s.so.1 $@
 	@cp -L /lib/x86_64-linux-gnu/libpthread.so.0 $@

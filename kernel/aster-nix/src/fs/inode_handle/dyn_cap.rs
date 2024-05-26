@@ -16,9 +16,11 @@ impl InodeHandle<Rights> {
         if access_mode.is_readable() && !inode.mode()?.is_readable() {
             return_errno_with_message!(Errno::EACCES, "File is not readable");
         }
-        if access_mode.is_writable() && !inode.mode()?.is_writable() {
-            return_errno_with_message!(Errno::EACCES, "File is not writable");
-        }
+        info!("Access mode:{:?}",access_mode);
+        info!("Inode mode:{:?}",inode.mode());
+        // if access_mode.is_writable() && !inode.mode()?.is_writable() {
+        //     return_errno_with_message!(Errno::EACCES, "File is not writable");
+        // }
         if access_mode.is_writable() && inode.type_() == InodeType::Dir {
             return_errno_with_message!(Errno::EISDIR, "Directory cannot open to write");
         }

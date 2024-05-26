@@ -1,13 +1,24 @@
 #!/bin/sh
-# The shell in Asterinas do not support list, so we need to sepearte the pgms :(
-# pgms=(pipe register spawn context1 fstime syscall dhry2 dhry2reg execl arithoh hanoi short int long float double)
-cd pgms
-# for pgm in ${pgms[@]}
- # do 
- # echo "Running "$pgm"(10 seconds):" 
- # ./$pgm 10
- # done
+# ========================================================
+# IoZone
+echo "Running iozone"
+iozone -s 4KB
+iozone -s 8KB
 
+cd ext2
+iozone -s 4KB
+iozone -s 8KB
+
+cd ../exfat
+iozone -s 4KB
+iozone -s 8KB
+
+cd ..
+
+# =========================================================
+# UnixBench
+echo "Running Unixbench"
+cd pgms
 # echo "Running execl:" 
 # UB_BINDIR=./ ./execl 10
 
@@ -34,7 +45,6 @@ echo "Running pipe:"
 echo "Running register:" 
 ./register 10
 
-# Spawn will cause out of memory, it need 4GB memory to complete this test script
 echo "Running spawn:" 
 ./spawn 10
 
@@ -73,4 +83,8 @@ echo "Running double:"
 
 echo "Running whetstone-double"
 ./whetstone-double
+
+cd ..
+# =========================================================
+
 
