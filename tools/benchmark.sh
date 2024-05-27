@@ -86,5 +86,46 @@ echo "Running whetstone-double"
 
 cd ..
 # =========================================================
+# lmbench
+cd lmbench
 
+echo ""
+echo "Running lat_syscall -P 1 null"
+./lat_syscall -P 1 null
+
+echo ""
+echo "Running lat_rand -P 1"
+./lat_rand
+
+echo ""
+echo "Running lat_fs -P 1"
+./lat_fs
+
+echo ""
+echo "Running lat_proc -P 1 fork"
+./lat_proc -P 1 fork
+
+echo ""
+echo "Running lat_proc -P 1 exec"
+./lat_proc -P 1 exec
+
+echo ""
+echo "Running lat_pipe -P 1"
+./lat_pipe -P 1
+
+echo ""
+echo "Running lat_unix -P 1"
+./lat_unix -P 1
+
+echo ""
+echo "Running lat_sig -P 1 install"
+./lat_sig -P 1 install
+
+echo ""
+echo "Running lat_sig -P 1 catch"
+./lat_sig -P 1 catch
+
+echo ""
+echo "Running lat_ctx -P 1 1024"
+./lat_ctx -P 1 1024
 

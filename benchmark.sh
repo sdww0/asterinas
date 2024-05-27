@@ -15,8 +15,20 @@ make
 cp -r pgms/ ../../../regression/build/initramfs
 cd ../../
 
+# lmbench
+
+rm -rf lmbench
+git clone https://github.com/sdww0/lmbench.git
+cd lmbench
+make CFLAGS=-static
+
+cp -r bin/x86_64-linux-gnu/ ../../regression/build/initramfs/lmbench
+
+cd ..
+
 # ========================================================
 # iozone
+rm -rf iozone3_506
 wget https://www.iozone.org/src/current/iozone3_506.tar
 tar -x -f iozone3_506.tar
 cd iozone3_506/src/current
