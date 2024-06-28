@@ -11,6 +11,7 @@ GDB_TCP_PORT ?= 1234
 INTEL_TDX ?= 0
 RELEASE ?= 0
 RELEASE_LTO ?= 0
+LOG_LEVEL ?= error
 SCHEME ?= ""
 # End of global options.
 
@@ -38,6 +39,18 @@ CARGO_OSDK_ARGS += --init-args="/test/boot_hello.sh"
 else ifeq ($(AUTO_TEST), vsock)
 export VSOCK=1
 CARGO_OSDK_ARGS += --init-args="/test/run_vsock_test.sh"
+endif
+
+ifeq ($(LOG_LEVEL), error)
+CARGO_OSDK_ARGS += --kcmd-args="loglevel=0"
+else ifeq ($(LOG_LEVEL), warn)
+CARGO_OSDK_ARGS += --kcmd-args="loglevel=1"
+else ifeq ($(LOG_LEVEL), info)
+CARGO_OSDK_ARGS += --kcmd-args="loglevel=2"
+else ifeq ($(LOG_LEVEL), debug)
+CARGO_OSDK_ARGS += --kcmd-args="loglevel=3"
+else ifeq ($(LOG_LEVEL), trace)
+CARGO_OSDK_ARGS += --kcmd-args="loglevel=4"
 endif
 
 # If the BENCHMARK is set, we will run the benchmark in the kernel mode.

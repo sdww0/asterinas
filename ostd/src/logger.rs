@@ -4,21 +4,20 @@
 
 use log::{Level, Metadata, Record};
 
-use crate::early_println;
+use crate::{boot::kernel_cmdline, early_println};
 
 const LOGGER: Logger = Logger {};
 
-/// The log level.
-///
-/// FIXME: The logs should be able to be read from files in the userspace,
-/// and the log level should be configurable.
-pub const INIT_LOG_LEVEL: Level = Level::Error;
+/// The log level. It will change during `logger::init`
+static mut LOG_LEVEL: Level = Level::Error;
 
 struct Logger {}
 
 impl log::Log for Logger {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= INIT_LOG_LEVEL
+        // SAFETY: Once changed in `logger::init`, LOG_LEVEL is guaranteed to be immutable during
+        // the system lifetime.
+        unsafe { metadata.level() <= LOG_LEVEL }
     }
 
     fn log(&self, record: &Record) {
@@ -30,8 +29,18 @@ impl log::Log for Logger {
     fn flush(&self) {}
 }
 
+/// Initialize the logger. Users should avoid using the log macros before this function is called.
 pub(crate) fn init() {
-    log::set_logger(&LOGGER)
-        .map(|()| log::set_max_level(INIT_LOG_LEVEL.to_level_filter()))
-        .unwrap();
+    log::set_logger(&LOGGER).unwrap();
+    let level = kernel_cmdline().get_log_level();
+    if let Some(level) = level {
+        // SAFETY: LOG_LEVEL only changed during initilization
+        unsafe {
+            LOG_LEVEL = level;
+        }
+    }
+    // SAFETY: LOG_LEVEL is guaranteed to be immutable.
+    unsafe {
+        log::set_max_level(LOG_LEVEL.to_level_filter());
+    }
 }
