@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+owo-colors = "3"
 align_ext = { path = "libs/align_ext" }
 ostd-macros = { path = "libs/ostd-macros" }
 bit_field = "0.10.1"

@@ -2,9 +2,12 @@
 
 //! Logging support.
 
-use log::{Level, Metadata, Record};
+use alloc::format;
 
-use crate::{boot::kernel_cmdline, early_println};
+use log::{Level, Metadata, Record};
+use owo_colors::OwoColorize;
+
+use crate::{arch::timer::Jiffies, boot::kernel_cmdline, early_println};
 
 const LOGGER: Logger = Logger {};
 
@@ -22,7 +25,19 @@ impl log::Log for Logger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            early_println!("[{}]: {}", record.level(), record.args());
+            let timestamp = {
+                let secs = format!("[{:>10?}]", Jiffies::elapsed().as_duration().as_secs_f64());
+                format!("{}", secs.green())
+            };
+            let level = match record.level() {
+                Level::Error => format!("{:<5}", record.level().red()),
+                Level::Warn => format!("{:<5}", record.level().bright_yellow()),
+                Level::Info => format!("{:<5}", record.level().blue()),
+                Level::Debug => format!("{:<5}", record.level().bright_green()),
+                Level::Trace => format!("{:<5}", record.level().bright_black()),
+            };
+
+            early_println!("{} {}: {}", timestamp, level, record.args().default_color());
         }
     }
 
