@@ -13,7 +13,7 @@ jobs:
       matrix:
         benchmark: |
           [
-          sysbench-cpu, sysbench-thread, getpid,
+          sysbench-cpu, sysbench-thread,
           lmbench-getpid, lmbench-fork, lmbench-signal
           ]
       fail-fast: false

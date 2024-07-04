@@ -89,8 +89,6 @@ $(INITRAMFS)/benchmark/bin:
 	@cp /usr/local/benchmark/sysbench/bin/sysbench $@
 	@cp /usr/local/benchmark/iperf/bin/iperf3 $@
 	@cp /usr/local/benchmark/membench/membench $@
-	@# Replace the homebrewed getpid with a standard benchmark like UnixBench or LMbench.
-	@gcc -O2 $(CUR_DIR)/apps/getpid/getpid.c -o $@/getpid
 
 # Make necessary directories.
 $(INITRAMFS_EMPTY_DIRS):
