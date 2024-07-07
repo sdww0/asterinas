@@ -88,6 +88,9 @@ $(INITRAMFS)/benchmark/bin:
 	@mkdir -p $@
 	@cp /usr/local/benchmark/sysbench/bin/sysbench $@
 	@cp /usr/local/benchmark/iperf/bin/iperf3 $@
+	@cp /usr/local/benchmark/iozone $@
+	@cp -r /usr/local/benchmark/unixbench $@
+	@cp -r /usr/local/benchmark/lmbench $@
 	@cp /usr/local/benchmark/membench/membench $@
 
 # Make necessary directories.
