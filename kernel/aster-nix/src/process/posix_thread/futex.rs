@@ -2,12 +2,23 @@
 
 #![allow(dead_code)]
 
-use core::sync::atomic::{AtomicBool, Ordering};
+use core::{
+    sync::atomic::{AtomicBool, Ordering},
+    time::Duration,
+};
 
-use ostd::{cpu::num_cpus, sync::WaitQueue};
+use ostd::{
+    cpu::num_cpus,
+    sync::{WaitQueue, Waiter},
+};
 use spin::Once;
 
-use crate::{prelude::*, thread::Tid, util::read_val_from_user};
+use crate::{
+    prelude::*,
+    thread::{Thread, Tid},
+    time::timespec_t,
+    util::read_val_from_user,
+};
 
 type FutexBitSet = u32;
 type FutexBucketRef = Arc<Mutex<FutexBucket>>;
@@ -149,11 +160,15 @@ pub fn init() {
 }
 
 #[derive(Debug, Clone)]
-pub struct FutexTimeout {}
+pub struct FutexTimeout {
+    value: Duration,
+}
 
 impl FutexTimeout {
-    pub fn new() -> Self {
-        todo!()
+    pub fn new(value: timespec_t) -> Self {
+        Self {
+            value: Duration::from(value),
+        }
     }
 }
 
@@ -437,7 +452,7 @@ impl FutexWaiter {
         };
 
         if let Some(_timeout) = timeout {
-            todo!()
+            self.wait_queue.wait_until_or_timeout(wake_cond, &timeout.value);
         } else {
             self.wait_queue.wait_until(wake_cond);
         }

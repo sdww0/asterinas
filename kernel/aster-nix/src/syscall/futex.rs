@@ -6,7 +6,7 @@ use crate::{
         futex_op_and_flags_from_u32, futex_requeue, futex_wait, futex_wait_bitset, futex_wake,
         futex_wake_bitset, FutexOp, FutexTimeout,
     },
-    syscall::SyscallReturn,
+    syscall::SyscallReturn, time::timespec_t, util::read_val_from_user,
 };
 
 pub fn sys_futex(
@@ -35,8 +35,8 @@ pub fn sys_futex(
         if timeout_addr == 0 {
             return Ok(None);
         }
-        // TODO: parse a timeout
-        todo!()
+        let value = read_val_from_user::<timespec_t>(timeout_addr as usize)?;
+        Ok(Some(FutexTimeout::new(value)))
     };
 
     let res = match futex_op {
