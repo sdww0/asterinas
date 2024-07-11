@@ -42,6 +42,8 @@ $(INITRAMFS)/lib/x86_64-linux-gnu: | $(VDSO_LIB)
 	@cp -L /lib/x86_64-linux-gnu/libm.so.6 $@
 	@cp -L /lib/x86_64-linux-gnu/libgcc_s.so.1 $@
 	@cp -L /lib/x86_64-linux-gnu/libpthread.so.0 $@
+	@# required for redis, nginx, sqlite3 etc.
+	@cp -L ../link/* $@
 	@# required for benchmarks
 	@cp -L /lib/x86_64-linux-gnu/libcrypto.so.3 $@
 	@cp -L /lib/x86_64-linux-gnu/libcrypt.so.1 $@
@@ -81,6 +83,8 @@ $(INITRAMFS)/etc:
 $(INITRAMFS)/bin:
 	@mkdir -p $@
 	@/bin/busybox --install -s $@
+	@cp ../bin/* $@
+
 
 $(INITRAMFS)/usr/bin: | $(INITRAMFS)/bin
 	@mkdir -p $@
