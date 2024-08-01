@@ -11,6 +11,9 @@ use crate::{
 };
 
 pub fn sys_fcntl(fd: FileDesc, cmd: i32, arg: u64) -> Result<SyscallReturn> {
+    if FcntlCmd::try_from(cmd).is_err() {
+        warn!("Unsupport cmd:{:?}", cmd);
+    }
     let fcntl_cmd = FcntlCmd::try_from(cmd)?;
     debug!("fd = {}, cmd = {:?}, arg = {}", fd, fcntl_cmd, arg);
     match fcntl_cmd {
