@@ -24,3 +24,7 @@ virtio-net.pcap
 
 # benchmark results
 /result_*.json
+benchmark/result
+
+# pycache
+__pycache__

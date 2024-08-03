@@ -15,6 +15,7 @@ RELEASE_LTO ?= 0
 LOG_LEVEL ?= error
 SCHEME ?= ""
 SMP ?= 1
+AUTO_RUN_SCRIPTS ?= ""
 # End of global options.
 
 # The Makefile provides a way to run arbitrary tests in the kernel
@@ -41,6 +42,10 @@ CARGO_OSDK_ARGS += --init-args="/test/boot_hello.sh"
 else ifeq ($(AUTO_TEST), vsock)
 export VSOCK=1
 CARGO_OSDK_ARGS += --init-args="/test/run_vsock_test.sh"
+endif
+
+ifneq ($(AUTO_RUN_SCRIPTS), "")
+CARGO_OSDK_ARGS += --init-args="$(AUTO_RUN_SCRIPTS)"
 endif
 
 # If the BENCHMARK is set, we will run the benchmark in the kernel mode.
