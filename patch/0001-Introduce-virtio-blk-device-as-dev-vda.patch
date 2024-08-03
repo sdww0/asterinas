@@ -1,0 +1,349 @@
+From 75091855c0a7341534d3792358276bcecafa693f Mon Sep 17 00:00:00 2001
+From: Shaowei Song <songshaowei.ssw@antgroup.com>
+Date: Tue, 9 Jul 2024 11:30:44 +0000
+Subject: [PATCH] Introduce virtio-blk device as "/dev/vda"
+
+---
+ kernel/aster-nix/src/device/mod.rs          |  12 +++
+ kernel/aster-nix/src/device/virtio_blk.rs   | 113 ++++++++++++++++++++
+ kernel/aster-nix/src/fs/inode_handle/mod.rs |   8 ++
+ kernel/aster-nix/src/fs/mod.rs              |  33 ++----
+ kernel/aster-nix/src/fs/ramfs/fs.rs         |   4 +-
+ kernel/aster-nix/src/lib.rs                 |   2 +-
+ test/Makefile                               |   6 +-
+ tools/qemu_args.sh                          |   3 +
+ 8 files changed, 151 insertions(+), 30 deletions(-)
+ create mode 100644 kernel/aster-nix/src/device/virtio_blk.rs
+
+diff --git a/kernel/aster-nix/src/device/mod.rs b/kernel/aster-nix/src/device/mod.rs
+index 131e9b35..9e007995 100644
+--- a/kernel/aster-nix/src/device/mod.rs
++++ b/kernel/aster-nix/src/device/mod.rs
+@@ -7,6 +7,7 @@ mod random;
+ mod tdxguest;
+ pub mod tty;
+ mod urandom;
++mod virtio_blk;
+ mod zero;
+ 
+ pub use pty::{new_pty_pair, PtyMaster, PtySlave};
+@@ -16,6 +17,7 @@ use tdx_guest::tdx_is_enabled;
+ #[cfg(feature = "intel_tdx")]
+ pub use tdxguest::TdxGuest;
+ pub use urandom::Urandom;
++pub use virtio_blk::start_block_device;
+ 
+ use self::tty::get_n_tty;
+ use crate::{
+@@ -48,6 +50,16 @@ pub fn init() -> Result<()> {
+     Ok(())
+ }
+ 
++/// Lazily init the virtio-blk device node.
++pub fn lazy_init() {
++    // The device name is specified in qemu args as `--serial={device_name}`
++    const VIRTIO_BLK_DEVICE_NAME: &str = "vda";
++    let _ = start_block_device(VIRTIO_BLK_DEVICE_NAME).unwrap();
++
++    let virtio_blk = Arc::new(virtio_blk::VirtioBlk::get_device(VIRTIO_BLK_DEVICE_NAME));
++    let _ = add_node(virtio_blk, VIRTIO_BLK_DEVICE_NAME).unwrap();
++}
++
+ // TODO: Implement a more scalable solution for ID-to-device mapping.
+ // Instead of hardcoding every device numbers in this function,
+ // a registration mechanism should be used to allow each driver to
+diff --git a/kernel/aster-nix/src/device/virtio_blk.rs b/kernel/aster-nix/src/device/virtio_blk.rs
+new file mode 100644
+index 00000000..5944a62e
+--- /dev/null
++++ b/kernel/aster-nix/src/device/virtio_blk.rs
+@@ -0,0 +1,113 @@
++// SPDX-License-Identifier: MPL-2.0
++
++#![allow(unused_variables)]
++
++use aster_block::{id::Bid, BlockDevice, BLOCK_SIZE};
++use aster_virtio::device::block::device::BlockDevice as VirtioBlkDevice;
++use ostd::mm::{FrameAllocOptions, VmIo};
++
++use super::*;
++use crate::{
++    events::IoEvents, fs::inode_handle::FileIo, prelude::*, process::signal::Poller,
++    thread::kernel_thread::KernelThreadExt,
++};
++
++/// Spawns a thread for a target block device for handling requests,
++/// given the `device_name`.
++///
++/// Currently only supports virtio-blk devices.
++pub fn start_block_device(device_name: &str) -> Result<Arc<dyn BlockDevice>> {
++    if let Some(device) = aster_block::get_device(device_name) {
++        let cloned_device = device.clone();
++        let task_fn = move || {
++            let virtio_blk_device = cloned_device.downcast_ref::<VirtioBlkDevice>().unwrap();
++            loop {
++                virtio_blk_device.handle_requests();
++            }
++        };
++        crate::Thread::spawn_kernel_thread(crate::ThreadOptions::new(task_fn));
++
++        println!("Spawn the virtio-blk device {} thread", device_name);
++        Ok(device)
++    } else {
++        return_errno_with_message!(Errno::ENOENT, "virtio-blk device does not exist");
++    }
++}
++
++/// Virtio-Blk device. Currently showed as a device under "/dev".
++pub(super) struct VirtioBlk {
++    device: Arc<dyn BlockDevice>,
++}
++
++impl VirtioBlk {
++    pub fn get_device(name: &str) -> Self {
++        let device = aster_block::get_device(name).unwrap();
++        Self { device }
++    }
++}
++
++impl Device for VirtioBlk {
++    fn type_(&self) -> DeviceType {
++        DeviceType::BlockDevice
++    }
++
++    fn id(&self) -> DeviceId {
++        // Consistent with Linux
++        DeviceId::new(253, 0)
++    }
++}
++
++impl FileIo for VirtioBlk {
++    fn read(&self, buf: &mut [u8]) -> Result<usize> {
++        self.read_at(0, buf)
++    }
++
++    fn write(&self, buf: &[u8]) -> Result<usize> {
++        self.write_at(0, buf)
++    }
++
++    fn read_at(&self, offset: usize, buf: &mut [u8]) -> Result<usize> {
++        let buf_len = buf.len();
++        check_offset_and_buf_len(offset, buf_len)?;
++
++        let buf_nblocks = buf_len / BLOCK_SIZE;
++        let segment = FrameAllocOptions::new(buf_nblocks)
++            .uninit(true)
++            .alloc_contiguous()?;
++
++        self.device
++            .read_blocks_sync(Bid::from_offset(offset as _), &segment)?;
++        segment.read_bytes(0, buf)?;
++        Ok(buf_len)
++    }
++
++    fn write_at(&self, offset: usize, buf: &[u8]) -> Result<usize> {
++        let buf_len = buf.len();
++        check_offset_and_buf_len(offset, buf_len)?;
++
++        let buf_nblocks = buf_len / BLOCK_SIZE;
++        let segment = FrameAllocOptions::new(buf_nblocks)
++            .uninit(true)
++            .alloc_contiguous()?;
++        segment.write_bytes(0, buf)?;
++
++        self.device
++            .write_blocks_sync(Bid::from_offset(offset as _), &segment)?;
++        Ok(buf_len)
++    }
++
++    fn poll(&self, mask: IoEvents, _poller: Option<&mut Poller>) -> IoEvents {
++        let events = IoEvents::IN | IoEvents::OUT;
++        events & mask
++    }
++}
++
++fn check_offset_and_buf_len(offset: usize, buf_len: usize) -> Result<()> {
++    if offset % BLOCK_SIZE != 0 {
++        return_errno_with_message!(Errno::EINVAL, "invalid offset");
++    }
++    if buf_len == 0 || buf_len % BLOCK_SIZE != 0 {
++        return_errno_with_message!(Errno::EINVAL, "invalid buffer length");
++    }
++    Ok(())
++}
+diff --git a/kernel/aster-nix/src/fs/inode_handle/mod.rs b/kernel/aster-nix/src/fs/inode_handle/mod.rs
+index 97ef40a4..adde4057 100644
+--- a/kernel/aster-nix/src/fs/inode_handle/mod.rs
++++ b/kernel/aster-nix/src/fs/inode_handle/mod.rs
+@@ -228,6 +228,14 @@ pub trait FileIo: Send + Sync + 'static {
+ 
+     fn write(&self, buf: &[u8]) -> Result<usize>;
+ 
++    fn read_at(&self, _offset: usize, buf: &mut [u8]) -> Result<usize> {
++        self.read(buf)
++    }
++
++    fn write_at(&self, _offset: usize, buf: &[u8]) -> Result<usize> {
++        self.write(buf)
++    }
++
+     fn poll(&self, mask: IoEvents, poller: Option<&mut Poller>) -> IoEvents;
+ 
+     fn ioctl(&self, cmd: IoctlCmd, arg: usize) -> Result<i32> {
+diff --git a/kernel/aster-nix/src/fs/mod.rs b/kernel/aster-nix/src/fs/mod.rs
+index 32114b73..eeadd622 100644
+--- a/kernel/aster-nix/src/fs/mod.rs
++++ b/kernel/aster-nix/src/fs/mod.rs
+@@ -1,4 +1,5 @@
+ // SPDX-License-Identifier: MPL-2.0
++
+ pub mod device;
+ pub mod devpts;
+ pub mod epoll;
+@@ -15,49 +16,29 @@ pub mod ramfs;
+ pub mod rootfs;
+ pub mod utils;
+ 
+-use aster_block::BlockDevice;
+-use aster_virtio::device::block::device::BlockDevice as VirtIoBlockDevice;
+-
+ use crate::{
++    device::start_block_device,
+     fs::{
+         exfat::{ExfatFS, ExfatMountOptions},
+         ext2::Ext2,
+         fs_resolver::FsPath,
+     },
+     prelude::*,
+-    thread::kernel_thread::KernelThreadExt,
+ };
+ 
+-fn start_block_device(device_name: &str) -> Result<Arc<dyn BlockDevice>> {
+-    if let Some(device) = aster_block::get_device(device_name) {
+-        let cloned_device = device.clone();
+-        let task_fn = move || {
+-            info!("spawn the virt-io-block thread");
+-            let virtio_block_device = cloned_device.downcast_ref::<VirtIoBlockDevice>().unwrap();
+-            loop {
+-                virtio_block_device.handle_requests();
+-            }
+-        };
+-        crate::Thread::spawn_kernel_thread(crate::ThreadOptions::new(task_fn));
+-        Ok(device)
+-    } else {
+-        return_errno_with_message!(Errno::ENOENT, "Device does not exist")
+-    }
+-}
+-
+ pub fn lazy_init() {
+-    //The device name is specified in qemu args as --serial={device_name}
+-    let ext2_device_name = "vext2";
+-    let exfat_device_name = "vexfat";
++    // Following device names are specified in qemu args as `--serial={device_name}`
++    const EXT2_DEVICE_NAME: &str = "vext2";
++    const EXFAT_DEVICE_NAME: &str = "vexfat";
+ 
+-    if let Ok(block_device_ext2) = start_block_device(ext2_device_name) {
++    if let Ok(block_device_ext2) = start_block_device(EXT2_DEVICE_NAME) {
+         let ext2_fs = Ext2::open(block_device_ext2).unwrap();
+         let target_path = FsPath::try_from("/ext2").unwrap();
+         println!("[kernel] Mount Ext2 fs at {:?} ", target_path);
+         self::rootfs::mount_fs_at(ext2_fs, &target_path).unwrap();
+     }
+ 
+-    if let Ok(block_device_exfat) = start_block_device(exfat_device_name) {
++    if let Ok(block_device_exfat) = start_block_device(EXFAT_DEVICE_NAME) {
+         let exfat_fs = ExfatFS::open(block_device_exfat, ExfatMountOptions::default()).unwrap();
+         let target_path = FsPath::try_from("/exfat").unwrap();
+         println!("[kernel] Mount ExFat fs at {:?} ", target_path);
+diff --git a/kernel/aster-nix/src/fs/ramfs/fs.rs b/kernel/aster-nix/src/fs/ramfs/fs.rs
+index f0a978b2..ed058c37 100644
+--- a/kernel/aster-nix/src/fs/ramfs/fs.rs
++++ b/kernel/aster-nix/src/fs/ramfs/fs.rs
+@@ -511,7 +511,7 @@ impl Inode for RamInode {
+             let self_inode = self.node.read();
+ 
+             if let Some(device) = self_inode.inner.as_device() {
+-                device.read(buf)?
++                device.read_at(offset, buf)?
+             } else {
+                 let Some(page_cache) = self_inode.inner.as_file() else {
+                     return_errno_with_message!(Errno::EISDIR, "read is not supported");
+@@ -542,7 +542,7 @@ impl Inode for RamInode {
+         let self_inode = self.node.upread();
+ 
+         if let Some(device) = self_inode.inner.as_device() {
+-            let device_written_len = device.write(buf)?;
++            let device_written_len = device.write_at(offset, buf)?;
+             let mut self_inode = self_inode.upgrade();
+             let now = now();
+             self_inode.set_mtime(now);
+diff --git a/kernel/aster-nix/src/lib.rs b/kernel/aster-nix/src/lib.rs
+index 7ef0fc89..ccaa6230 100644
+--- a/kernel/aster-nix/src/lib.rs
++++ b/kernel/aster-nix/src/lib.rs
+@@ -92,7 +92,7 @@ fn init_thread() {
+     ostd::trap::enable_local();
+     net::lazy_init();
+     fs::lazy_init();
+-    // driver::pci::virtio::block::block_device_test();
++    device::lazy_init();
+     let thread = Thread::spawn_kernel_thread(ThreadOptions::new(|| {
+         println!("[kernel] Hello world from kernel!");
+         let current = current_thread!();
+diff --git a/test/Makefile b/test/Makefile
+index 4f6a3016..c45ae009 100644
+--- a/test/Makefile
++++ b/test/Makefile
+@@ -12,6 +12,7 @@ INITRAMFS_FILELIST := $(BUILD_DIR)/initramfs.filelist
+ INITRAMFS_IMAGE := $(BUILD_DIR)/initramfs.cpio.gz
+ EXT2_IMAGE := $(BUILD_DIR)/ext2.img
+ EXFAT_IMAGE := $(BUILD_DIR)/exfat.img
++VDA_IMAGE := $(BUILD_DIR)/vda.img
+ INITRAMFS_EMPTY_DIRS := \
+ 	$(INITRAMFS)/sbin \
+ 	$(INITRAMFS)/root \
+@@ -148,8 +149,11 @@ $(EXFAT_IMAGE):
+ 	@fallocate -l 64M $(EXFAT_IMAGE)
+ 	@mkfs.exfat $(EXFAT_IMAGE)
+ 
++$(VDA_IMAGE):
++	@dd if=/dev/zero of=$(VDA_IMAGE) bs=1G count=1
++
+ .PHONY: build
+-build: $(INITRAMFS_IMAGE) $(EXT2_IMAGE) $(EXFAT_IMAGE)
++build: $(INITRAMFS_IMAGE) $(EXT2_IMAGE) $(EXFAT_IMAGE) $(VDA_IMAGE)
+ 
+ .PHONY: format
+ format:
+diff --git a/tools/qemu_args.sh b/tools/qemu_args.sh
+index eaf66704..170aa656 100755
+--- a/tools/qemu_args.sh
++++ b/tools/qemu_args.sh
+@@ -27,6 +27,7 @@ COMMON_QEMU_ARGS="\
+     -device isa-debug-exit,iobase=0xf4,iosize=0x04 \
+     -drive if=none,format=raw,id=x0,file=./test/build/ext2.img \
+     -drive if=none,format=raw,id=x1,file=./test/build/exfat.img \
++    -drive if=none,format=raw,id=x2,file=./test/build/vda.img \
+ "
+ 
+ if [ "$1" = "iommu" ]; then
+@@ -42,6 +43,7 @@ QEMU_ARGS="\
+     -machine q35,kernel-irqchip=split \
+     -device virtio-blk-pci,bus=pcie.0,addr=0x6,drive=x0,serial=vext2,disable-legacy=on,disable-modern=off$IOMMU_DEV_EXTRA \
+     -device virtio-blk-pci,bus=pcie.0,addr=0x7,drive=x1,serial=vexfat,disable-legacy=on,disable-modern=off$IOMMU_DEV_EXTRA \
++    -device virtio-blk-pci,bus=pcie.0,addr=0x8,drive=x2,serial=vda,disable-legacy=on,disable-modern=off$IOMMU_DEV_EXTRA \
+     -device virtio-keyboard-pci,disable-legacy=on,disable-modern=off$IOMMU_DEV_EXTRA \
+     -device virtio-net-pci,netdev=net01,disable-legacy=on,disable-modern=off$IOMMU_DEV_EXTRA \
+     -device virtio-serial-pci,disable-legacy=on,disable-modern=off$IOMMU_DEV_EXTRA \
+@@ -56,6 +58,7 @@ MICROVM_QEMU_ARGS="\
+     -no-user-config \
+     -device virtio-blk-device,drive=x0,serial=vext2 \
+     -device virtio-blk-device,drive=x1,serial=vexfat \
++    -device virtio-blk-device,drive=x2,serial=vda \
+     -device virtio-keyboard-device \
+     -device virtio-net-device,netdev=net01 \
+     -device virtio-serial-device \
+-- 
+2.34.1
+
