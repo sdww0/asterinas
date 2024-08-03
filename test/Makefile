@@ -29,6 +29,7 @@ INITRAMFS_ALL_DIRS := \
 	$(INITRAMFS)/usr/bin \
 	$(INITRAMFS)/test \
 	$(INITRAMFS)/benchmark \
+	$(INITRAMFS)/conf \
 	$(INITRAMFS_EMPTY_DIRS)
 SYSCALL_TEST_DIR := $(INITRAMFS)/opt/syscall_test
 
@@ -85,6 +86,9 @@ $(INITRAMFS)/bin:
 	@/bin/busybox --install -s $@
 	@cp ../bin/* $@
 
+$(INITRAMFS)/conf:
+	@mkdir -p $@
+	@cp ../conf/* $@
 
 $(INITRAMFS)/usr/bin: | $(INITRAMFS)/bin
 	@mkdir -p $@

@@ -9,7 +9,7 @@
 
 RAND_PORT_NUM1=$(shuf -i 1024-65535 -n 1)
 RAND_PORT_NUM2=$(shuf -i 1024-65535 -n 1)
-RAND_PORT_NUM3=$(shuf -i 1024-65535 -n 1)
+RAND_PORT_NUM3=6379
 
 echo "[$1] Forwarded QEMU guest port: $RAND_PORT_NUM1->22; $RAND_PORT_NUM2->8080 $RAND_PORT_NUM3>6379" 1>&2
 

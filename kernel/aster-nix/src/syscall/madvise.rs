@@ -18,6 +18,7 @@ pub fn sys_madvise(start: Vaddr, len: usize, behavior: i32) -> Result<SyscallRet
             read_bytes_from_user(start, &mut VmWriter::from(buffer.as_mut_slice()))?;
         }
         MadviseBehavior::MADV_DONTNEED => madv_dontneed(start, len)?,
+        MadviseBehavior::MADV_FREE => {}
         _ => todo!(),
     }
     Ok(SyscallReturn::Return(0))
@@ -30,7 +31,7 @@ fn madv_dontneed(start: Vaddr, len: usize) -> Result<()> {
     let root_vmar = current.root_vmar();
     let advised_range = start..start + len;
     // `destroy()` interface may require adjustment and replacement afterwards.
-    let _ = root_vmar.destroy(advised_range);
+    // let _ = root_vmar.destroy(advised_range);
     Ok(())
 }
 
