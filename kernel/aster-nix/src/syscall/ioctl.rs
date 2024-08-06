@@ -11,6 +11,9 @@ use crate::{
 };
 
 pub fn sys_ioctl(fd: FileDesc, cmd: u32, arg: Vaddr) -> Result<SyscallReturn> {
+    if IoctlCmd::try_from(cmd).is_err() {
+        error!("Unimplemented cmd command: {:x?}", cmd);
+    }
     let ioctl_cmd = IoctlCmd::try_from(cmd)?;
     debug!(
         "fd = {}, ioctl_cmd = {:?}, arg = 0x{:x}",

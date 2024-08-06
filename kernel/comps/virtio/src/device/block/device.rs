@@ -85,6 +85,8 @@ impl aster_block::BlockDevice for BlockDevice {
         BlockDeviceMeta {
             max_nr_segments_per_bio: self.queue.max_nr_segments_per_bio(),
             nr_sectors: device_config.capacity_sectors(),
+            blk_size: device_config.blk_size as usize,
+            capacity: device_config.capacity as usize * 512,
         }
     }
 }
@@ -111,6 +113,7 @@ impl DeviceInner {
             VirtioBlockConfig::sector_size(),
             "currently not support customized device logical block size"
         );
+        info!("Block cfg:{:x?}", config.read().unwrap());
         let num_queues = transport.num_queues();
         if num_queues != 1 {
             // FIXME: support Multi-Queue Block IO Queueing Mechanism
