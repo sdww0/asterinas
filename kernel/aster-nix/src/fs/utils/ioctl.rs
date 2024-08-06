@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 #[repr(u32)]
-#[derive(Debug, Clone, Copy, TryFromInt)]
+#[derive(Debug, Clone, Copy, TryFromInt, PartialEq, Eq)]
 pub enum IoctlCmd {
     /// Get terminal attributes
     TCGETS = 0x5401,
@@ -29,6 +29,8 @@ pub enum IoctlCmd {
     TIOCNOTTY = 0x5422,
     /// Enable or disable asynchronous I/O mode.
     FIOASYNC = 0x5452,
+    /// Get block size 64
+    FIOBLKGETSIZE64 = 0x80081272,
     /// Get Pty Number
     TIOCGPTN = 0x80045430,
     /// Lock/unlock Pty

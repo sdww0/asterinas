@@ -58,6 +58,8 @@ $(INITRAMFS)/lib/x86_64-linux-gnu: | $(VDSO_LIB)
 	@cp -L /lib/x86_64-linux-gnu/libkrb5support.so.0 $@
 	@cp -L /lib/x86_64-linux-gnu/libkeyutils.so.1 $@
 	@cp -L /lib/x86_64-linux-gnu/libresolv.so.2 $@
+	@# required for FIO
+	@cp -L ./libaio $@
 	@# required for VDSO
 	@cp -L $(VDSO_LIB) $@
 
@@ -76,6 +78,8 @@ $(INITRAMFS)/etc:
 	@mkdir -p $@
 	@cp $(CUR_DIR)/etc/passwd $@
 	@cp $(CUR_DIR)/etc/group $@
+	@cp ./randwrite.fio $@
+	@cp ./seqwrite.fio $@
 
 # Install busybox into /bin and /usr/bin.
 $(INITRAMFS)/bin:

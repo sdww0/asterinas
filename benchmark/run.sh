@@ -1,9 +1,9 @@
 #!/bin/bash
 
-export OS_NAME=aster
+# export OS_NAME=aster
 
-./benchs.sh
-./data.sh
+# ./benchs.sh
+# ./data.sh
 
 export OS_NAME=linux
 
