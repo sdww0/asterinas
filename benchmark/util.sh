@@ -1,7 +1,7 @@
 #!/bin/bash
 
 LINUX_KERNEL="vmlinuz-6.6.42-060642-generic"
-EXCLUDED_BENCHS=(util cpu memory ipc other network disk)
+EXCLUDED_BENCHS=(util cpu memory ipc other network disk fio)
 
 function iterDir() {
     files=()
