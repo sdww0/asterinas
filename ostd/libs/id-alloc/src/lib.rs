@@ -152,12 +152,8 @@ impl IdAlloc {
     ///
     /// If the ID is already allocated, it returns `None`, otherwise it
     /// returns the allocated ID.
-    ///
-    /// # Panics
-    ///
-    /// If the `id` is out of bounds, this method will panic.
     pub fn alloc_specific(&mut self, id: usize) -> Option<usize> {
-        if self.bitset[id] {
+        if id >= self.bitset.len() || self.bitset[id] {
             return None;
         }
         self.bitset.set(id, true);
