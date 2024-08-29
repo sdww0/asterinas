@@ -18,7 +18,7 @@ pub fn sys_futex(
     bitset: u64,
     ctx: &Context,
 ) -> Result<SyscallReturn> {
-    // FIXME: we current ignore futex flags
+    // FIXME: we current ignore FutexFlags::FUTEX_CLOCK_REALTIME
     let (futex_op, futex_flags) = futex_op_and_flags_from_u32(futex_op as _)?;
     debug!(
         "futex_op = {:?}, futex_flags = {:?}, futex_addr = 0x{:x}",
@@ -40,22 +40,32 @@ pub fn sys_futex(
         todo!()
     };
 
+    let pid = ctx.process.pid();
     let res = match futex_op {
         FutexOp::FUTEX_WAIT => {
             let timeout = get_futex_timeout(utime_addr)?;
-            futex_wait(futex_addr as _, futex_val as _, &timeout).map(|_| 0)
+            futex_wait(futex_addr as _, futex_val as _, &timeout, pid, futex_flags).map(|_| 0)
         }
         FutexOp::FUTEX_WAIT_BITSET => {
             let timeout = get_futex_timeout(utime_addr)?;
-            futex_wait_bitset(futex_addr as _, futex_val as _, &timeout, bitset as _).map(|_| 0)
+            futex_wait_bitset(
+                futex_addr as _,
+                futex_val as _,
+                &timeout,
+                bitset as _,
+                pid,
+                futex_flags,
+            )
+            .map(|_| 0)
         }
         FutexOp::FUTEX_WAKE => {
             let max_count = get_futex_val(futex_val as i32)?;
-            futex_wake(futex_addr as _, max_count).map(|count| count as isize)
+            futex_wake(futex_addr as _, max_count, pid, futex_flags).map(|count| count as isize)
         }
         FutexOp::FUTEX_WAKE_BITSET => {
             let max_count = get_futex_val(futex_val as i32)?;
-            futex_wake_bitset(futex_addr as _, max_count, bitset as _).map(|count| count as isize)
+            futex_wake_bitset(futex_addr as _, max_count, bitset as _, pid, futex_flags)
+                .map(|count| count as isize)
         }
         FutexOp::FUTEX_REQUEUE => {
             let max_nwakes = get_futex_val(futex_val as i32)?;
@@ -65,6 +75,8 @@ pub fn sys_futex(
                 max_nwakes,
                 max_nrequeues,
                 futex_new_addr as _,
+                pid,
+                futex_flags,
             )
             .map(|nwakes| nwakes as _)
         }

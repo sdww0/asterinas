@@ -53,7 +53,7 @@ pub fn lazy_init() {
 
     if let Ok(block_device_ext2) = start_block_device(ext2_device_name) {
         let ext2_fs = Ext2::open(block_device_ext2).unwrap();
-        let target_path = FsPath::try_from("/ext2").unwrap();
+        let target_path = FsPath::try_from("/tmp").unwrap();
         println!("[kernel] Mount Ext2 fs at {:?} ", target_path);
         self::rootfs::mount_fs_at(ext2_fs, &target_path).unwrap();
     }

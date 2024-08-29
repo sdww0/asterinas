@@ -6,10 +6,11 @@ use intrusive_collections::{intrusive_adapter, LinkedList, LinkedListAtomicLink}
 use ostd::{
     cpu::num_cpus,
     sync::{Waiter, Waker},
+    trap::disable_local,
 };
 use spin::Once;
 
-use crate::prelude::*;
+use crate::{prelude::*, process::Pid};
 
 type FutexBitSet = u32;
 type FutexBucketRef = Arc<Mutex<FutexBucket>>;
@@ -19,8 +20,21 @@ const FUTEX_FLAGS_MASK: u32 = 0xFFFF_FFF0;
 const FUTEX_BITSET_MATCH_ANY: FutexBitSet = 0xFFFF_FFFF;
 
 /// do futex wait
-pub fn futex_wait(futex_addr: u64, futex_val: i32, timeout: &Option<FutexTimeout>) -> Result<()> {
-    futex_wait_bitset(futex_addr as _, futex_val, timeout, FUTEX_BITSET_MATCH_ANY)
+pub fn futex_wait(
+    futex_addr: u64,
+    futex_val: i32,
+    timeout: &Option<FutexTimeout>,
+    pid: Pid,
+    flags: FutexFlags,
+) -> Result<()> {
+    futex_wait_bitset(
+        futex_addr as _,
+        futex_val,
+        timeout,
+        FUTEX_BITSET_MATCH_ANY,
+        pid,
+        flags,
+    )
 }
 
 /// do futex wait bitset
@@ -29,12 +43,14 @@ pub fn futex_wait_bitset(
     futex_val: i32,
     timeout: &Option<FutexTimeout>,
     bitset: FutexBitSet,
+    pid: Pid,
+    flags: FutexFlags,
 ) -> Result<()> {
     debug!(
         "futex_wait_bitset addr: {:#x}, val: {}, timeout: {:?}, bitset: {:#x}",
         futex_addr, futex_val, timeout, bitset
     );
-    let futex_key = FutexKey::new(futex_addr, bitset);
+    let futex_key = FutexKey::new(futex_addr, bitset, pid, flags);
     let (futex_item, waiter) = FutexItem::create(futex_key);
 
     let (_, futex_bucket_ref) = get_futex_bucket(futex_key);
@@ -57,8 +73,13 @@ pub fn futex_wait_bitset(
 }
 
 /// do futex wake
-pub fn futex_wake(futex_addr: Vaddr, max_count: usize) -> Result<usize> {
-    futex_wake_bitset(futex_addr, max_count, FUTEX_BITSET_MATCH_ANY)
+pub fn futex_wake(
+    futex_addr: Vaddr,
+    max_count: usize,
+    pid: Pid,
+    flags: FutexFlags,
+) -> Result<usize> {
+    futex_wake_bitset(futex_addr, max_count, FUTEX_BITSET_MATCH_ANY, pid, flags)
 }
 
 /// Do futex wake with bitset
@@ -66,13 +87,15 @@ pub fn futex_wake_bitset(
     futex_addr: Vaddr,
     max_count: usize,
     bitset: FutexBitSet,
+    pid: Pid,
+    flags: FutexFlags,
 ) -> Result<usize> {
     debug!(
         "futex_wake_bitset addr: {:#x}, max_count: {}, bitset: {:#x}",
         futex_addr, max_count, bitset
     );
 
-    let futex_key = FutexKey::new(futex_addr, bitset);
+    let futex_key = FutexKey::new(futex_addr, bitset, pid, flags);
     let (_, futex_bucket_ref) = get_futex_bucket(futex_key);
     let mut futex_bucket = futex_bucket_ref.lock();
     let res = futex_bucket.remove_and_wake_items(futex_key, max_count);
@@ -87,13 +110,15 @@ pub fn futex_requeue(
     max_nwakes: usize,
     max_nrequeues: usize,
     futex_new_addr: Vaddr,
+    pid: Pid,
+    flags: FutexFlags,
 ) -> Result<usize> {
     if futex_new_addr == futex_addr {
-        return futex_wake(futex_addr, max_nwakes);
+        return futex_wake(futex_addr, max_nwakes, pid, flags);
     }
 
-    let futex_key = FutexKey::new(futex_addr, FUTEX_BITSET_MATCH_ANY);
-    let futex_new_key = FutexKey::new(futex_new_addr, FUTEX_BITSET_MATCH_ANY);
+    let futex_key = FutexKey::new(futex_addr, FUTEX_BITSET_MATCH_ANY, pid, flags);
+    let futex_new_key = FutexKey::new(futex_new_addr, FUTEX_BITSET_MATCH_ANY, pid, flags);
     let (bucket_idx, futex_bucket_ref) = get_futex_bucket(futex_key);
     let (new_bucket_idx, futex_new_bucket_ref) = get_futex_bucket(futex_new_key);
 
@@ -320,16 +345,21 @@ impl FutexItem {
 struct FutexKey {
     addr: Vaddr,
     bitset: FutexBitSet,
+    pid: Pid,
 }
 
 impl FutexKey {
-    pub fn new(addr: Vaddr, bitset: FutexBitSet) -> Self {
-        Self { addr, bitset }
+    pub fn new(addr: Vaddr, bitset: FutexBitSet, mut pid: Pid, flags: FutexFlags) -> Self {
+        if !flags.contains(FutexFlags::FUTEX_PRIVATE) {
+            pid = 0;
+        }
+        Self { addr, bitset, pid }
     }
 
     pub fn load_val(&self) -> i32 {
         // FIXME: how to implement a atomic load?
-        warn!("implement an atomic load");
+        info!("implement an atomic load");
+        let _ = disable_local();
         CurrentUserSpace::get().read_val(self.addr).unwrap()
     }
 
@@ -342,7 +372,8 @@ impl FutexKey {
     }
 
     pub fn match_up(&self, another: &Self) -> bool {
-        self.addr == another.addr && (self.bitset & another.bitset) != 0
+        // FIXME: Use hash value to do match_up
+        self.addr == another.addr && (self.bitset & another.bitset) != 0 && self.pid == another.pid
     }
 }
 

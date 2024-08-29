@@ -332,7 +332,7 @@ pub fn handle_syscall(ctx: &Context, user_ctx: &mut UserContext) {
             }
         }
         Err(err) => {
-            debug!("syscall return error: {:?}", err);
+            warn!("syscall return error: {:?}", err);
             let errno = err.error() as i32;
             user_ctx.set_syscall_ret((-errno) as usize)
         }
@@ -346,13 +346,15 @@ macro_rules! log_syscall_entry {
             let syscall_name_str = stringify!($syscall_name);
             let pid = $crate::current!().pid();
             let tid = $crate::current_thread!().tid();
-            log::info!(
+            // if $syscall_name != 0 && $syscall_name != 1 {
+            log::warn!(
                 "[pid={}][tid={}][id={}][{}]",
                 pid,
                 tid,
                 $syscall_name,
                 syscall_name_str
             );
+            // }
         }
     };
 }

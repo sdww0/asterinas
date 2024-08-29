@@ -22,6 +22,10 @@ pub fn handle_exception(ctx: &Context, context: &UserContext) {
                 generate_fault_signal(trap_info, ctx);
             }
         }
+        GENERAL_PROTECTION_FAULT => {
+            debug!("context:{:#x?}", context);
+            generate_fault_signal(trap_info, ctx);
+        }
         _ => {
             // We current do nothing about other exceptions
             generate_fault_signal(trap_info, ctx);

@@ -4,7 +4,11 @@
 
 use crate::{
     prelude::*,
-    process::{posix_thread::futex::futex_wake, Pid},
+    process::{
+        posix_thread::futex::{futex_wake, FutexFlags},
+        Pid,
+    },
+    thread::Tid,
 };
 
 #[repr(C)]
@@ -125,7 +129,7 @@ const FUTEX_TID_MASK: u32 = 0x3FFF_FFFF;
 
 /// Wakeup one robust futex owned by the thread
 /// FIXME: requires atomic operations here
-pub fn wake_robust_futex(futex_addr: Vaddr, tid: Pid) -> Result<()> {
+pub fn wake_robust_futex(futex_addr: Vaddr, tid: Tid, pid: Pid) -> Result<()> {
     let user_space = CurrentUserSpace::get();
     let futex_val = {
         if futex_addr == 0 {
@@ -150,7 +154,7 @@ pub fn wake_robust_futex(futex_addr: Vaddr, tid: Pid) -> Result<()> {
         // Wakeup one waiter
         if cur_val & FUTEX_WAITERS != 0 {
             debug!("wake robust futex addr: {:?}", futex_addr);
-            futex_wake(futex_addr, 1)?;
+            futex_wake(futex_addr, 1, pid, FutexFlags::FUTEX_PRIVATE)?;
         }
         break;
     }

@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MPL-2.0
 
-use super::{futex::futex_wake, robust_list::wake_robust_futex, PosixThread, PosixThreadExt};
+use super::{
+    futex::{futex_wake, FutexFlags},
+    robust_list::wake_robust_futex,
+    PosixThread, PosixThreadExt,
+};
 use crate::{
     prelude::*,
-    process::{do_exit_group, TermStatus},
+    process::{do_exit_group, Pid, TermStatus},
     thread::{thread_table, Thread, Tid},
 };
 
@@ -18,14 +22,14 @@ pub fn do_exit(thread: Arc<Thread>, term_status: TermStatus) -> Result<()> {
     }
     thread.exit();
 
-    let tid = thread.tid();
-
     let posix_thread = thread.as_posix_thread().unwrap();
+    let pid = posix_thread.process().pid();
+    let tid = thread.tid();
 
     let mut clear_ctid = posix_thread.clear_child_tid().lock();
     // If clear_ctid !=0 ,do a futex wake and write zero to the clear_ctid addr.
     if *clear_ctid != 0 {
-        futex_wake(*clear_ctid, 1)?;
+        futex_wake(*clear_ctid, 1, pid, FutexFlags::FUTEX_PRIVATE)?;
         // FIXME: the correct write length?
         CurrentUserSpace::get()
             .write_val(*clear_ctid, &0u32)
@@ -33,7 +37,7 @@ pub fn do_exit(thread: Arc<Thread>, term_status: TermStatus) -> Result<()> {
         *clear_ctid = 0;
     }
     // exit the robust list: walk the robust list; mark futex words as dead and do futex wake
-    wake_robust_list(posix_thread, tid);
+    wake_robust_list(posix_thread, tid, pid);
 
     if tid != posix_thread.process().pid() {
         // We don't remove main thread.
@@ -46,13 +50,18 @@ pub fn do_exit(thread: Arc<Thread>, term_status: TermStatus) -> Result<()> {
         do_exit_group(term_status);
     }
 
-    futex_wake(Arc::as_ptr(&posix_thread.process()) as Vaddr, 1)?;
+    futex_wake(
+        Arc::as_ptr(&posix_thread.process()) as Vaddr,
+        1,
+        pid,
+        FutexFlags::FUTEX_PRIVATE,
+    )?;
     Ok(())
 }
 
 /// Walks the robust futex list, marking futex dead and wake waiters.
 /// It corresponds to Linux's exit_robust_list(), errors are silently ignored.
-fn wake_robust_list(thread: &PosixThread, tid: Tid) {
+fn wake_robust_list(thread: &PosixThread, tid: Tid, pid: Pid) {
     let mut robust_list = thread.robust_list.lock();
     let list_head = match *robust_list {
         Some(robust_list_head) => robust_list_head,
@@ -60,7 +69,7 @@ fn wake_robust_list(thread: &PosixThread, tid: Tid) {
     };
     trace!("wake the rubust_list: {:?}", list_head);
     for futex_addr in list_head.futexes() {
-        wake_robust_futex(futex_addr, tid).unwrap();
+        wake_robust_futex(futex_addr, tid, pid).unwrap();
     }
     *robust_list = None;
 }

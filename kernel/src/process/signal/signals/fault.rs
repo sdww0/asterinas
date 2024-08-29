@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MPL-2.0
 
-use ostd::cpu::{
-    CpuException, CpuExceptionInfo, ALIGNMENT_CHECK, BOUND_RANGE_EXCEEDED, DIVIDE_BY_ZERO,
-    GENERAL_PROTECTION_FAULT, INVALID_OPCODE, PAGE_FAULT, SIMD_FLOATING_POINT_EXCEPTION,
-    X87_FLOATING_POINT_EXCEPTION,
+use ostd::{
+    arch::trap,
+    cpu::{
+        CpuException, CpuExceptionInfo, ALIGNMENT_CHECK, BOUND_RANGE_EXCEEDED, DIVIDE_BY_ZERO,
+        GENERAL_PROTECTION_FAULT, INVALID_OPCODE, PAGE_FAULT, SIMD_FLOATING_POINT_EXCEPTION,
+        X87_FLOATING_POINT_EXCEPTION,
+    },
 };
 
 use super::Signal;
@@ -28,9 +31,15 @@ impl FaultSignal {
                 (SIGFPE, FPE_FLTDIV, None)
             }
             BOUND_RANGE_EXCEEDED => (SIGSEGV, SEGV_BNDERR, None),
-            ALIGNMENT_CHECK => (SIGBUS, BUS_ADRALN, None),
+            ALIGNMENT_CHECK => {
+                warn!("Alignment check");
+                (SIGBUS, BUS_ADRALN, None)
+            }
             INVALID_OPCODE => (SIGILL, ILL_ILLOPC, None),
-            GENERAL_PROTECTION_FAULT => (SIGBUS, BUS_ADRERR, None),
+            GENERAL_PROTECTION_FAULT => {
+                warn!("General protection fault");
+                (SIGBUS, BUS_ADRERR, None)
+            }
             PAGE_FAULT => {
                 const PF_ERR_FLAG_PRESENT: usize = 1usize << 0;
                 let code = if trap_info.error_code & PF_ERR_FLAG_PRESENT != 0 {
