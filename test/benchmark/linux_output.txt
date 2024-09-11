@@ -1,0 +1,1095 @@
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.hle [bit 4]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.rtm [bit 11]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.avx512f [bit 16]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.avx512dq [bit 17]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.clwb [bit 24]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.avx512cd [bit 28]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.avx512bw [bit 30]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:EBX.avx512vl [bit 31]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.avx512vbmi [bit 1]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.avx512vbmi2 [bit 6]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.gfni [bit 8]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.vaes [bit 9]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.vpclmulqdq [bit 10]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.avx512vnni [bit 11]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.avx512bitalg [bit 12]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.avx512-vpopcntdq [bit 14]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.07H:ECX.la57 [bit 16]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.80000008H:EBX.wbnoinvd [bit 9]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.0DH:EAX [bit 5]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.0DH:EAX [bit 6]
+qemu-system-x86_64: warning: host doesn't support requested feature: CPUID.0DH:EAX [bit 7]
+c[?7l[2J[0mSeaBIOS (version rel-1.16.3-0-ga6ed6b701f0a-prebuilt.qemu.org)
+
+
+iPXE (http://ipxe.org) 00:02.0 CA00 PCI2.10 PnP PMM+7EFD0B70+7EF30B70 CA00
+Press Ctrl-B to configure iPXE (PCI 00:02.0)...                                                                               
+
+
+Booting from ROM..c[?7l[2J[0m.[    0.000000] Linux version 5.15.0-105-generic (buildd@lcy02-amd64-054) (gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0, GNU ld (GNU Binutils for Ubuntu) 2.34) #115~20.04.1-Ubuntu SMP Mon Apr 15 17:33:04 UTC 2024 (Ubuntu 5.15.0-105.115~20.04.1-generic 5.15.148)
+[    0.000000] Command line: console=ttyS0 rdinit=/benchmark/benchmark_entrypoint.sh mitigations=off hugepages=0 transparent_hugepage=never
+[    0.000000] KERNEL supported cpus:
+[    0.000000]   Intel GenuineIntel
+[    0.000000]   AMD AuthenticAMD
+[    0.000000]   Hygon HygonGenuine
+[    0.000000]   Centaur CentaurHauls
+[    0.000000]   zhaoxin   Shanghai  
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x000000007ffdbfff] usable
+[    0.000000] BIOS-e820: [mem 0x000000007ffdc000-0x000000007fffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000b0000000-0x00000000bfffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fed1c000-0x00000000fed1ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000027fffffff] usable
+[    0.000000] NX (Execute Disable) protection: active
+[    0.000000] SMBIOS 3.0.0 present.
+[    0.000000] DMI: QEMU Standard PC (Q35 + ICH9, 2009), BIOS rel-1.16.3-0-ga6ed6b701f0a-prebuilt.qemu.org 04/01/2014
+[    0.000000] Hypervisor detected: KVM
+[    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000000] kvm-clock: cpu 0, msr 69a01001, primary cpu clock
+[    0.000001] kvm-clock: using sched offset of 228652998 cycles
+[    0.000002] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000005] tsc: Detected 2904.008 MHz processor
+[    0.000717] last_pfn = 0x280000 max_arch_pfn = 0x400000000
+[    0.000748] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.000755] last_pfn = 0x7ffdc max_arch_pfn = 0x400000000
+[    0.006326] found SMP MP-table at [mem 0x000f5470-0x000f547f]
+[    0.006336] Kernel/User page tables isolation: disabled on command line.
+[    0.006341] Using GB pages for direct mapping
+[    0.006624] RAMDISK: [mem 0x7f141000-0x7ffcffff]
+[    0.006629] ACPI: Early table checksum verification disabled
+[    0.006633] ACPI: RSDP 0x00000000000F5270 000014 (v00 BOCHS )
+[    0.006636] ACPI: RSDT 0x000000007FFE230D 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.006641] ACPI: FACP 0x000000007FFE2105 0000F4 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.006646] ACPI: DSDT 0x000000007FFE0040 0020C5 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.006650] ACPI: FACS 0x000000007FFE0000 000040
+[    0.006653] ACPI: APIC 0x000000007FFE21F9 000078 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.006656] ACPI: HPET 0x000000007FFE2271 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.006659] ACPI: MCFG 0x000000007FFE22A9 00003C (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.006662] ACPI: WAET 0x000000007FFE22E5 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.006664] ACPI: Reserving FACP table memory at [mem 0x7ffe2105-0x7ffe21f8]
+[    0.006666] ACPI: Reserving DSDT table memory at [mem 0x7ffe0040-0x7ffe2104]
+[    0.006667] ACPI: Reserving FACS table memory at [mem 0x7ffe0000-0x7ffe003f]
+[    0.006667] ACPI: Reserving APIC table memory at [mem 0x7ffe21f9-0x7ffe2270]
+[    0.006668] ACPI: Reserving HPET table memory at [mem 0x7ffe2271-0x7ffe22a8]
+[    0.006669] ACPI: Reserving MCFG table memory at [mem 0x7ffe22a9-0x7ffe22e4]
+[    0.006670] ACPI: Reserving WAET table memory at [mem 0x7ffe22e5-0x7ffe230c]
+[    0.007023] No NUMA configuration found
+[    0.007024] Faking a node at [mem 0x0000000000000000-0x000000027fffffff]
+[    0.007037] NODE_DATA(0) allocated [mem 0x27ffd4000-0x27fffdfff]
+[    0.007496] Zone ranges:
+[    0.007497]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.007500]   DMA32    [mem 0x0000000001000000-0x00000000ffffffff]
+[    0.007502]   Normal   [mem 0x0000000100000000-0x000000027fffffff]
+[    0.007505]   Device   empty
+[    0.007506] Movable zone start for each node
+[    0.007510] Early memory node ranges
+[    0.007511]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.007513]   node   0: [mem 0x0000000000100000-0x000000007ffdbfff]
+[    0.007515]   node   0: [mem 0x0000000100000000-0x000000027fffffff]
+[    0.007518] Initmem setup node 0 [mem 0x0000000000001000-0x000000027fffffff]
+[    0.007679] On node 0, zone DMA: 1 pages in unavailable ranges
+[    0.007691] On node 0, zone DMA: 97 pages in unavailable ranges
+[    0.023332] On node 0, zone Normal: 36 pages in unavailable ranges
+[    0.023533] ACPI: PM-Timer IO Port: 0x608
+[    0.023547] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.023590] IOAPIC[0]: apic_id 0, version 32, address 0xfec00000, GSI 0-23
+[    0.023593] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.023595] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.023596] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.023597] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.023598] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.023601] ACPI: Using ACPI (MADT) for SMP configuration information
+[    0.023602] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.023607] TSC deadline timer available
+[    0.023608] smpboot: Allowing 1 CPUs, 0 hotplug CPUs
+[    0.023632] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.023634] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x0009ffff]
+[    0.023636] PM: hibernation: Registered nosave memory: [mem 0x000a0000-0x000effff]
+[    0.023638] PM: hibernation: Registered nosave memory: [mem 0x000f0000-0x000fffff]
+[    0.023640] PM: hibernation: Registered nosave memory: [mem 0x7ffdc000-0x7fffffff]
+[    0.023642] PM: hibernation: Registered nosave memory: [mem 0x80000000-0xafffffff]
+[    0.023643] PM: hibernation: Registered nosave memory: [mem 0xb0000000-0xbfffffff]
+[    0.023645] PM: hibernation: Registered nosave memory: [mem 0xc0000000-0xfed1bfff]
+[    0.023647] PM: hibernation: Registered nosave memory: [mem 0xfed1c000-0xfed1ffff]
+[    0.023648] PM: hibernation: Registered nosave memory: [mem 0xfed20000-0xfeffbfff]
+[    0.023650] PM: hibernation: Registered nosave memory: [mem 0xfeffc000-0xfeffffff]
+[    0.023651] PM: hibernation: Registered nosave memory: [mem 0xff000000-0xfffbffff]
+[    0.023653] PM: hibernation: Registered nosave memory: [mem 0xfffc0000-0xffffffff]
+[    0.023655] [mem 0xc0000000-0xfed1bfff] available for PCI devices
+[    0.023657] Booting paravirtualized kernel on KVM
+[    0.023660] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645519600211568 ns
+[    0.023668] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:1 nr_cpu_ids:1 nr_node_ids:1
+[    0.023896] percpu: Embedded 61 pages/cpu s212992 r8192 d28672 u2097152
+[    0.023920] kvm-guest: stealtime: cpu 0, msr 277c33080
+[    0.023922] kvm-guest: PV spinlocks disabled, no host support
+[    0.023925] Built 1 zonelists, mobility grouping on.  Total pages: 2064092
+[    0.023926] Policy zone: Normal
+[    0.023928] Kernel command line: console=ttyS0 rdinit=/benchmark/benchmark_entrypoint.sh mitigations=off hugepages=0 transparent_hugepage=never
+[    0.024746] Dentry cache hash table entries: 1048576 (order: 11, 8388608 bytes, linear)
+[    0.025180] Inode-cache hash table entries: 524288 (order: 10, 4194304 bytes, linear)
+[    0.025213] mem auto-init: stack:off, heap alloc:on, heap free:off
+[    0.055453] Memory: 8104720K/8388072K available (16393K kernel code, 4390K rwdata, 10856K rodata, 3356K init, 18720K bss, 283092K reserved, 0K cma-reserved)
+[    0.055964] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.056003] ftrace: allocating 50199 entries in 197 pages
+[    0.073155] ftrace: allocated 197 pages with 4 groups
+[    0.073401] rcu: Hierarchical RCU implementation.
+[    0.073403] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=1.
+[    0.073404] 	Rude variant of Tasks RCU enabled.
+[    0.073405] 	Tracing variant of Tasks RCU enabled.
+[    0.073405] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+[    0.073406] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=1
+[    0.076604] NR_IRQS: 524544, nr_irqs: 256, preallocated irqs: 16
+[    0.076776] random: crng init done
+[    0.082498] Console: colour VGA+ 80x25
+[    0.124661] printk: console [ttyS0] enabled
+[    0.124912] ACPI: Core revision 20210730
+[    0.125235] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.125821] APIC: Switch to symmetric I/O mode setup
+[    0.126327] x2apic enabled
+[    0.127449] Switched APIC routing to physical x2apic.
+[    0.129321] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.129715] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x29dc0d988f1, max_idle_ns: 440795328788 ns
+[    0.130308] Calibrating delay loop (skipped) preset value.. 5808.01 BogoMIPS (lpj=11616032)
+[    0.130819] x86/cpu: User Mode Instruction Prevention (UMIP) activated
+[    0.131232] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[    0.131528] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[    0.131858] Spectre V2 : User space: Vulnerable
+[    0.132110] Speculative Store Bypass: Vulnerable
+[    0.132389] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
+[    0.132816] x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'
+[    0.133169] x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'
+[    0.133521] x86/fpu: Supporting XSAVE feature 0x200: 'Protection Keys User registers'
+[    0.134308] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[    0.134651] x86/fpu: xstate_offset[9]: 2688, xstate_sizes[9]:    8
+[    0.134990] x86/fpu: Enabled xstate features 0x207, context size is 2696 bytes, using 'standard' format.
+[    0.153901] Freeing SMP alternatives memory: 44K
+[    0.154188] pid_max: default: 32768 minimum: 301
+[    0.154323] LSM: Security Framework initializing
+[    0.154621] landlock: Up and running.
+[    0.154856] Yama: becoming mindful.
+[    0.155246] AppArmor: AppArmor initialized
+[    0.155502] Mount-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.155927] Mountpoint-cache hash table entries: 16384 (order: 5, 131072 bytes, linear)
+[    0.156570] smpboot: CPU0: Intel Xeon Processor (Icelake) (family: 0x6, model: 0x86, stepping: 0x0)
+[    0.157154] Performance Events: unsupported p6 CPU model 134 no PMU driver, software events only.
+[    0.157661] signal: max sigframe size: 3632
+[    0.157915] rcu: Hierarchical SRCU implementation.
+[    0.158305] NMI watchdog: Perf NMI watchdog permanently disabled
+[    0.158305] smp: Bringing up secondary CPUs ...
+[    0.158305] smp: Brought up 1 node, 1 CPU
+[    0.158305] smpboot: Max logical packages: 1
+[    0.158305] smpboot: Total of 1 processors activated (5808.01 BogoMIPS)
+[    0.158305] devtmpfs: initialized
+[    0.158305] x86/mm: Memory block size: 128MB
+[    0.158652] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.159207] futex hash table entries: 256 (order: 2, 16384 bytes, linear)
+[    0.159618] pinctrl core: initialized pinctrl subsystem
+[    0.159998] PM: RTC time: 04:50:57, date: 2024-09-11
+[    0.160341] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.160887] DMA: preallocated 1024 KiB GFP_KERNEL pool for atomic allocations
+[    0.161331] DMA: preallocated 1024 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.161920] DMA: preallocated 1024 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.162315] audit: initializing netlink subsys (disabled)
+[    0.162714] thermal_sys: Registered thermal governor 'fair_share'
+[    0.162715] thermal_sys: Registered thermal governor 'bang_bang'
+[    0.163058] thermal_sys: Registered thermal governor 'step_wise'
+[    0.163387] thermal_sys: Registered thermal governor 'user_space'
+[    0.163720] thermal_sys: Registered thermal governor 'power_allocator'
+[    0.164064] EISA bus registered
+[    0.164604] cpuidle: using governor ladder
+[    0.164832] cpuidle: using governor menu
+[    0.165091] ACPI: bus type PCI registered
+[    0.165321] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.165752] PCI: MMCONFIG for domain 0000 [bus 00-ff] at [mem 0xb0000000-0xbfffffff] (base 0xb0000000)
+[    0.166275] PCI: MMCONFIG at [mem 0xb0000000-0xbfffffff] reserved in E820
+[    0.166311] audit: type=2000 audit(1726030257.992:1): state=initialized audit_enabled=0 res=1
+[    0.166796] PCI: Using configuration type 1 for base access
+[    0.167878] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.168428] HugeTLB registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.168810] HugeTLB registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.169617] ACPI: Added _OSI(Module Device)
+[    0.169861] ACPI: Added _OSI(Processor Device)
+[    0.170114] ACPI: Added _OSI(3.0 _SCP Extensions)
+[    0.170310] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.170613] ACPI: Added _OSI(Linux-Dell-Video)
+[    0.170865] ACPI: Added _OSI(Linux-Lenovo-NV-HDMI-Audio)
+[    0.171163] ACPI: Added _OSI(Linux-HPI-Hybrid-Graphics)
+[    0.172419] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.173472] ACPI: Interpreter enabled
+[    0.173691] ACPI: PM: (supports S0 S3 S4 S5)
+[    0.173930] ACPI: Using IOAPIC for interrupt routing
+[    0.174231] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.174309] PCI: Using E820 reservations for host bridge windows
+[    0.174705] ACPI: Enabled 2 GPEs in block 00 to 3F
+[    0.176036] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.176388] acpi PNP0A08:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI EDR HPX-Type3]
+[    0.176959] acpi PNP0A08:00: _OSC: platform does not support [PCIeHotplug LTR DPC]
+[    0.177422] acpi PNP0A08:00: _OSC: OS now controls [SHPCHotplug PME AER PCIeCapability]
+[    0.177960] PCI host bridge to bus 0000:00
+[    0.178198] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.178335] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.178717] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.179093] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.179503] pci_bus 0000:00: root bus resource [mem 0x80000000-0xafffffff window]
+[    0.179919] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.180334] pci_bus 0000:00: root bus resource [mem 0x280000000-0xa7fffffff window]
+[    0.180803] pci 0000:00:00.0: [8086:29c0] type 00 class 0x060000
+[    0.181555] pci 0000:00:01.0: [1234:1111] type 00 class 0x030000
+[    0.182673] pci 0000:00:01.0: reg 0x10: [mem 0xfd000000-0xfdffffff pref]
+[    0.184273] pci 0000:00:01.0: reg 0x18: [mem 0xfebd0000-0xfebd0fff]
+[    0.187049] pci 0000:00:01.0: reg 0x30: [mem 0xfebc0000-0xfebcffff pref]
+[    0.187568] pci 0000:00:01.0: Video device with shadowed ROM at [mem 0x000c0000-0x000dffff]
+[    0.188514] pci 0000:00:02.0: [1af4:1041] type 00 class 0x020000
+[    0.190005] pci 0000:00:02.0: reg 0x14: [mem 0xfebd1000-0xfebd1fff]
+[    0.191970] pci 0000:00:02.0: reg 0x20: [mem 0xfe000000-0xfe003fff 64bit pref]
+[    0.193269] pci 0000:00:02.0: reg 0x30: [mem 0xfeb80000-0xfebbffff pref]
+[    0.194715] pci 0000:00:06.0: [1af4:1042] type 00 class 0x010000
+[    0.195776] pci 0000:00:06.0: reg 0x14: [mem 0xfebd2000-0xfebd2fff]
+[    0.197191] pci 0000:00:06.0: reg 0x20: [mem 0xfe004000-0xfe007fff 64bit pref]
+[    0.202695] pci 0000:00:1f.0: [8086:2918] type 00 class 0x060100
+[    0.203519] pci 0000:00:1f.0: quirk: [io  0x0600-0x067f] claimed by ICH6 ACPI/GPIO/TCO
+[    0.204143] pci 0000:00:1f.2: [8086:2922] type 00 class 0x010601
+[    0.206024] pci 0000:00:1f.2: reg 0x20: [io  0xc040-0xc05f]
+[    0.206653] pci 0000:00:1f.2: reg 0x24: [mem 0xfebd3000-0xfebd3fff]
+[    0.207572] pci 0000:00:1f.3: [8086:2930] type 00 class 0x0c0500
+[    0.208931] pci 0000:00:1f.3: reg 0x20: [io  0x0700-0x073f]
+[    0.210268] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.210364] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.210748] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.211139] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.211525] ACPI: PCI: Interrupt link LNKE configured for IRQ 10
+[    0.211907] ACPI: PCI: Interrupt link LNKF configured for IRQ 10
+[    0.212293] ACPI: PCI: Interrupt link LNKG configured for IRQ 11
+[    0.213339] ACPI: PCI: Interrupt link LNKH configured for IRQ 11
+[    0.213696] ACPI: PCI: Interrupt link GSIA configured for IRQ 16
+[    0.214042] ACPI: PCI: Interrupt link GSIB configured for IRQ 17
+[    0.214313] ACPI: PCI: Interrupt link GSIC configured for IRQ 18
+[    0.214658] ACPI: PCI: Interrupt link GSID configured for IRQ 19
+[    0.214998] ACPI: PCI: Interrupt link GSIE configured for IRQ 20
+[    0.215342] ACPI: PCI: Interrupt link GSIF configured for IRQ 21
+[    0.215680] ACPI: PCI: Interrupt link GSIG configured for IRQ 22
+[    0.216021] ACPI: PCI: Interrupt link GSIH configured for IRQ 23
+[    0.216710] iommu: Default domain type: Translated 
+[    0.216989] iommu: DMA domain TLB invalidation policy: lazy mode 
+[    0.217487] SCSI subsystem initialized
+[    0.217794] pci 0000:00:01.0: vgaarb: setting as boot VGA device
+[    0.218134] pci 0000:00:01.0: vgaarb: VGA device added: decodes=io+mem,owns=io+mem,locks=none
+[    0.218308] pci 0000:00:01.0: vgaarb: bridge control possible
+[    0.218632] vgaarb: loaded
+[    0.218811] ACPI: bus type USB registered
+[    0.219059] usbcore: registered new interface driver usbfs
+[    0.219379] usbcore: registered new interface driver hub
+[    0.219680] usbcore: registered new device driver usb
+[    0.219973] pps_core: LinuxPPS API ver. 1 registered
+[    0.220257] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.220765] PTP clock support registered
+[    0.221011] EDAC MC: Ver: 3.0.0
+[    0.221470] NetLabel: Initializing
+[    0.221672] NetLabel:  domain hash size = 128
+[    0.221918] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.222250] NetLabel:  unlabeled traffic allowed by default
+[    0.222331] PCI: Using ACPI for IRQ routing
+[    0.297373] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.297655] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.299356] clocksource: Switched to clocksource kvm-clock
+[    0.304598] VFS: Disk quotas dquot_6.6.0
+[    0.304849] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.305267] AppArmor: AppArmor Filesystem Enabled
+[    0.305604] pnp: PnP ACPI init
+[    0.305909] system 00:05: [mem 0xb0000000-0xbfffffff window] has been reserved
+[    0.306507] pnp: PnP ACPI: found 6 devices
+[    0.314862] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.315392] NET: Registered PF_INET protocol family
+[    0.315859] IP idents hash table entries: 131072 (order: 8, 1048576 bytes, linear)
+[    0.317338] tcp_listen_portaddr_hash hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.317834] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.318284] TCP established hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.318921] TCP bind hash table entries: 65536 (order: 8, 1048576 bytes, linear)
+[    0.319376] TCP: Hash tables configured (established 65536 bind 65536)
+[    0.319779] MPTCP token hash table entries: 8192 (order: 5, 196608 bytes, linear)
+[    0.320221] UDP hash table entries: 4096 (order: 5, 131072 bytes, linear)
+[    0.320617] UDP-Lite hash table entries: 4096 (order: 5, 131072 bytes, linear)
+[    0.321063] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.321388] NET: Registered PF_XDP protocol family
+[    0.321686] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.322034] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.322380] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.322761] pci_bus 0000:00: resource 7 [mem 0x80000000-0xafffffff window]
+[    0.323144] pci_bus 0000:00: resource 8 [mem 0xc0000000-0xfebfffff window]
+[    0.323526] pci_bus 0000:00: resource 9 [mem 0x280000000-0xa7fffffff window]
+[    0.323975] PCI: CLS 0 bytes, default 64
+[    0.324241] Trying to unpack rootfs image as initramfs...
+[    0.329639] PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+[    0.330011] software IO TLB: mapped [mem 0x000000007b141000-0x000000007f141000] (64MB)
+[    0.330496] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x29dc0d988f1, max_idle_ns: 440795328788 ns
+[    0.333691] Initialise system trusted keyrings
+[    0.333969] Key type blacklist registered
+[    0.334264] workingset: timestamp_bits=36 max_order=21 bucket_order=0
+[    0.335399] zbud: loaded
+[    0.335685] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.337661] fuse: init (API version 7.34)
+[    0.337983] integrity: Platform Keyring initialized
+[    0.349572] Key type asymmetric registered
+[    0.349813] Asymmetric key parser 'x509' registered
+[    0.350103] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 243)
+[    0.350553] io scheduler mq-deadline registered
+[    0.350885] shpchp: Standard Hot Plug PCI Controller Driver version: 0.4
+[    0.351348] input: Power Button as /devices/LNXSYSTM:00/LNXPWRBN:00/input/input0
+[    0.351794] ACPI: button: Power Button [PWRF]
+[    0.352325] ACPI: \_SB_.GSIG: Enabled at IRQ 22
+[    0.353724] Serial: 8250/16550 driver, 32 ports, IRQ sharing enabled
+[    0.397723] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    0.402333] Linux agpgart interface v0.103
+[    0.403259] loop: module loaded
+[    0.403580] tun: Universal TUN/TAP device driver, 1.6
+[    0.403902] PPP generic driver version 2.4.2
+[    0.404169] VFIO - User Level meta-driver version: 0.3
+[    0.409597] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    0.409971] ehci-pci: EHCI PCI platform driver
+[    0.410229] ehci-platform: EHCI generic platform driver
+[    0.410527] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    0.410879] ohci-pci: OHCI PCI platform driver
+[    0.411138] ohci-platform: OHCI generic platform driver
+[    0.411442] uhci_hcd: USB Universal Host Controller Interface driver
+[    0.411828] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    0.412995] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    0.413284] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    0.413626] mousedev: PS/2 mouse device common for all mice
+[    0.414086] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input1
+[    0.414708] rtc_cmos 00:04: RTC can wake from S4
+[    0.415315] rtc_cmos 00:04: registered as rtc0
+[    0.415609] rtc_cmos 00:04: setting system clock to 2024-09-11T04:50:57 UTC (1726030257)
+[    0.416090] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    0.416508] i2c_dev: i2c /dev entries driver
+[    0.416759] device-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled. Duplicate IMA measurements will not be recorded in the IMA log.
+[    0.417456] device-mapper: uevent: version 1.0.3
+[    0.421591] device-mapper: ioctl: 4.45.0-ioctl (2021-03-22) initialised: dm-devel@redhat.com
+[    0.422082] platform eisa.0: Probing EISA bus 0
+[    0.422343] platform eisa.0: EISA: Cannot allocate resource for mainboard
+[    0.422717] platform eisa.0: Cannot allocate resource for EISA slot 1
+[    0.423073] platform eisa.0: Cannot allocate resource for EISA slot 2
+[    0.423429] platform eisa.0: Cannot allocate resource for EISA slot 3
+[    0.423782] platform eisa.0: Cannot allocate resource for EISA slot 4
+[    0.424141] platform eisa.0: Cannot allocate resource for EISA slot 5
+[    0.424500] platform eisa.0: Cannot allocate resource for EISA slot 6
+[    0.424858] platform eisa.0: Cannot allocate resource for EISA slot 7
+[    0.425215] platform eisa.0: Cannot allocate resource for EISA slot 8
+[    0.425586] platform eisa.0: EISA: Detected 0 cards
+[    0.425861] intel_pstate: CPU model not supported
+[    0.429620] ledtrig-cpu: registered to indicate activity on CPUs
+[    0.430013] drop_monitor: Initializing network drop monitor service
+[    0.430458] NET: Registered PF_INET6 protocol family
+[    0.504895] Freeing initrd memory: 14908K
+[    0.505381] Segment Routing with IPv6
+[    0.505627] In-situ OAM (IOAM) with IPv6
+[    0.505872] NET: Registered PF_PACKET protocol family
+[    0.506223] Key type dns_resolver registered
+[    0.506572] IPI shorthand broadcast: enabled
+[    0.506831] sched_clock: Marking stable (460052150, 45548370)->(512310692, -6710172)
+[    0.507307] registered taskstats version 1
+[    0.507571] Loading compiled-in X.509 certificates
+[    0.508222] Loaded X.509 cert 'Build time autogenerated kernel key: 306d45095292a6163d2b12091b12e102435cef5c'
+[    0.509099] Loaded X.509 cert 'Canonical Ltd. Live Patch Signing: 14df34d1a87cf37625abec039ef2bf521249b969'
+[    0.509987] Loaded X.509 cert 'Canonical Ltd. Kernel Module Signing: 88f752e560a1e0737e31163a466ad7b70a850c19'
+[    0.510550] blacklist: Loading compiled-in revocation X.509 certificates
+[    0.510934] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing: 61482aa2830d0ab2ad5af10b7250da9033ddcef0'
+[    0.511481] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2017): 242ade75ac4a15e50d50c84b0d45ff3eae707a03'
+[    0.512061] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (ESM 2018): 365188c1d374d6b07c3c8f240f8ef722433d6a8b'
+[    0.512661] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2019): c0746fd6c5da3ae827864651ad66ae47fe24b3e8'
+[    0.513242] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2021 v1): a8d54bbb3825cfb94fa13c9f8a594a195c107b8d'
+[    0.513850] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2021 v2): 4cf046892d6fd3c9a5b03f98d845f90851dc6a8c'
+[    0.514456] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (2021 v3): 100437bb6de6e469b581e61cd66bce3ef4ed53af'
+[    0.515052] Loaded X.509 cert 'Canonical Ltd. Secure Boot Signing (Ubuntu Core 2019): c1d57b8f6b743f23ee41f4f7ee292f06eecadfb9'
+[    0.515709] zswap: loaded using pool lzo/zbud
+[    0.516016] Key type .fscrypt registered
+[    0.516242] Key type fscrypt-provisioning registered
+[    0.516607] Key type encrypted registered
+[    0.516839] AppArmor: AppArmor sha1 policy hashing enabled
+[    0.517151] ima: No TPM chip found, activating TPM-bypass!
+[    0.517463] Loading compiled-in module X.509 certificates
+[    0.518107] Loaded X.509 cert 'Build time autogenerated kernel key: 306d45095292a6163d2b12091b12e102435cef5c'
+[    0.518669] ima: Allocated hash algorithm: sha1
+[    0.518933] ima: No architecture policies found
+[    0.519200] evm: Initialising EVM extended attributes:
+[    0.519490] evm: security.selinux
+[    0.519679] evm: security.SMACK64
+[    0.519868] evm: security.SMACK64EXEC
+[    0.520075] evm: security.SMACK64TRANSMUTE
+[    0.520304] evm: security.SMACK64MMAP
+[    0.520510] evm: security.apparmor
+[    0.520700] evm: security.ima
+[    0.520870] evm: security.capability
+[    0.521073] evm: HMAC attrs: 0x1
+[    0.521401] PM:   Magic number: 8:55:818
+[    0.521746] RAS: Correctable Errors collector initialized.
+[    0.522823] Freeing unused decrypted memory: 2036K
+[    0.523331] Freeing unused kernel image (initmem) memory: 3356K
+[    0.529611] Write protecting the kernel read-only data: 30720k
+[    0.530781] Freeing unused kernel image (text/rodata gap) memory: 2036K
+[    0.531249] Freeing unused kernel image (rodata/data gap) memory: 1432K
+[    0.539955] x86/mm: Checked W+X mappings: passed, no W+X pages found.
+[    0.540321] Run /benchmark/benchmark_entrypoint.sh as init process
+[    0.556070] virtio_blk virtio1: [vda] 4194296 512-byte logical blocks (2.15 GB/2.00 GiB)
+/benchmark/benchmark_entrypoint.sh: line 11: mkfs.ext2: not found
+[    0.558105] EXT4-fs (vda): mounting ext2 file system using the ext4 subsystem
+[    0.559866] EXT4-fs (vda): mounted filesystem without journal. Opts: (null). Quota mode: none.
+Running lmbench-ctx
+*** Running the LMbench context switch latency test ***
+[    1.565620] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+
+"size=0k ovr=0.26
+18 0.80
+
+
+BusyBox v1.30.1 (Ubuntu 1:1.30.1-7ubuntu3) built-in shell (ash)
+Enter 'help' for a list of built-in commands.
+
+/bin/sh: can't access tty; job control turned off
+~ # [6nic[Jfconfig
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:110 (110.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+~ # [6n~ # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:110 (110.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+~ # [6n~ # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:110 (110.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+~ # [6n~ # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:110 (110.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+~ # [6ns[Jls /dv[Jev
+console          tty11            tty44            ttyS19
+cpu_dma_latency  tty12            tty45            ttyS2
+dma_heap         tty13            tty46            ttyS20
+ecryptfs         tty14            tty47            ttyS21
+full             tty15            tty48            ttyS22
+fuse             tty16            tty49            ttyS23
+hpet             tty17            tty5             ttyS24
+hwrng            tty18            tty50            ttyS25
+input            tty19            tty51            ttyS26
+kmsg             tty2             tty52            ttyS27
+loop-control     tty20            tty53            ttyS28
+loop0            tty21            tty54            ttyS29
+loop1            tty22            tty55            ttyS3
+loop2            tty23            tty56            ttyS30
+loop3            tty24            tty57            ttyS31
+loop4            tty25            tty58            ttyS4
+loop5            tty26            tty59            ttyS5
+loop6            tty27            tty6             ttyS6
+loop7            tty28            tty60            ttyS7
+mapper           tty29            tty61            ttyS8
+mcelog           tty3             tty62            ttyS9
+mem              tty30            tty63            ttyprintk
+net              tty31            tty7             udmabuf
+null             tty32            tty8             uinput
+port             tty33            tty9             urandom
+ppp              tty34            ttyS0            vcs
+psaux            tty35            ttyS1            vcs1
+ptmx             tty36            ttyS10           vcsa
+random           tty37            ttyS11           vcsa1
+rfkill           tty38            ttyS12           vcsu
+rtc0             tty39            ttyS13           vcsu1
+snapshot         tty4             ttyS14           vda
+tty              tty40            ttyS15           vfio
+tty0             tty41            ttyS16           vga_arbiter
+tty1             tty42            ttyS17           zero
+tty10            tty43            ttyS18
+~ # [6n~ # ls /dev[J/ne~ # ls /dev/net/[J~ # ls /dev/net/tun [J
+benchmark/  etc/        lib/        proc/       test/
+bin/        exfat/      lib64/      root/       tmp/
+dev/        ext2/       opt/        sbin/       usr/
+~ # ls /dev/net/tun [J
+benchmark/  etc/        lib/        proc/       test/
+bin/        exfat/      lib64/      root/       tmp/
+dev/        ext2/       opt/        sbin/       usr/
+~ # ls /dev/net/tun [J[J[J[J[J
+tun
+~ # [6niperf3 --help
+/bin/sh: iperf3: not found
+~ # [6niper[J[J[J[Jcd ben~ # cd benchmark/[Jb~ # cd benchmark/bin/[J
+/benchmark/bin # [6n./iperf3 --help
+Usage: iperf3 [-s|-c host] [options]
+       iperf3 [-h|--help] [-v|--version]
+
+Server or Client:
+  -p, --port      #         server port to listen on/connect to
+  -f, --format   [kmgtKMGT] format to report: Kbits, Mbits, Gbits, Tbits
+  -i, --interval  #         seconds between periodic throughput reports
+  -I, --pidfile file        write PID file
+  -F, --file name           xmit/recv the specified file
+  -A, --affinity n[,m]      set CPU affinity core number to n (the core the process will use)
+                             (optional Client only m - the Server's core number for this test)
+  -B, --bind <host>[%<dev>] bind to the interface associated with the address <host>
+                            (optional <dev> equivalent to `--bind-dev <dev>`)
+  --bind-dev <dev>          bind to the network interface with SO_BINDTODEVICE
+  -V, --verbose             more detailed output
+  -J, --json                output in JSON format
+  --json-stream             output in line-delimited JSON format
+  --logfile f               send output to a log file
+  --forceflush              force flushing output at every interval
+  --timestamps<=format>     emit a timestamp at the start of each output line
+                            (optional "=" and format string as per strftime(3))
+  --rcv-timeout #           idle timeout for receiving data (default 120000 ms)
+  --snd-timeout #           timeout for unacknowledged TCP data
+                            (in ms, default is system settings)
+  -d, --debug[=#]           emit debugging output
+                            (optional optional "=" and debug level: 1-4. Default is 4 - all messages)
+  -v, --version             show version information and quit
+  -h, --help                show this message and quit
+Server specific:
+  -s, --server              run in server mode
+  -D, --daemon              run the server as a daemon
+  -1, --one-off             handle one client connection then exit
+  --server-bitrate-limit #[KMG][/#]   server's total bit rate limit (default 0 = no limit)
+                            (optional slash and number of secs interval for averaging
+                            total data rate.  Default is 5 seconds)
+  --idle-timeout #          restart idle server after # seconds in case it
+                            got stuck (default - no timeout)
+  --rsa-private-key-path    path to the RSA private key used to decrypt
+                            authentication credentials
+  --authorized-users-path   path to the configuration file containing user
+                            credentials
+  --time-skew-threshold     time skew threshold (in seconds) between the server
+                            and client during the authentication process
+  --use-pkcs1-padding       use pkcs1 padding at your own risk
+Client specific:
+  -c, --client <host>[%<dev>] run in client mode, connecting to <host>
+                              (option <dev> equivalent to `--bind-dev <dev>`)
+  -u, --udp                 use UDP rather than TCP
+  --connect-timeout #       timeout for control connection setup (ms)
+  -b, --bitrate #[KMG][/#]  target bitrate in bits/sec (0 for unlimited)
+                            (default 1 Mbit/sec for UDP, unlimited for TCP)
+                            (optional slash and packet count for burst mode)
+  --pacing-timer #[KMG]     set the timing for pacing, in microseconds (default 1000)
+  --fq-rate #[KMG]          enable fair-queuing based socket pacing in
+                            bits/sec (Linux only)
+  -t, --time      #         time in seconds to transmit for (default 10 secs)
+  -n, --bytes     #[KMG]    number of bytes to transmit (instead of -t)
+  -k, --blockcount #[KMG]   number of blocks (packets) to transmit (instead of -t or -n)
+  -l, --length    #[KMG]    length of buffer to read or write
+                            (default 128 KB for TCP, dynamic or 1460 for UDP)
+  --cport         <port>    bind to a specific client port (TCP and UDP, default: ephemeral port)
+  -P, --parallel  #         number of parallel client streams to run
+  -R, --reverse             run in reverse mode (server sends, client receives)
+  --bidir                   run in bidirectional mode.
+                            Client and server send and receive data.
+  -w, --window    #[KMG]    set send/receive socket buffer sizes
+                            (indirectly sets TCP window size)
+  -C, --congestion <algo>   set TCP congestion control algorithm (Linux and FreeBSD only)
+  -M, --set-mss   #         set TCP/SCTP maximum segment size (MTU - 40 bytes)
+  -N, --no-delay            set TCP/SCTP no delay, disabling Nagle's Algorithm
+  -4, --version4            only use IPv4
+  -6, --version6            only use IPv6
+  -S, --tos N               set the IP type of service, 0-255.
+                            The usual prefixes for octal and hex can be used,
+                            i.e. 52, 064 and 0x34 all specify the same value.
+  --dscp N or --dscp val    set the IP dscp value, either 0-63 or symbolic.
+                            Numeric values can be specified in decimal,
+                            octal and hex (see --tos above).
+  -L, --flowlabel N         set the IPv6 flow label (only supported on Linux)
+  -Z, --zerocopy            use a 'zero copy' method of sending data
+  -O, --omit N              perform pre-test for N seconds and omit the pre-test statistics
+  -T, --title str           prefix every output line with this string
+  --extra-data str          data string to include in client and server JSON
+  --get-server-output       get results from server
+  --udp-counters-64bit      use 64-bit counters in UDP test packets
+  --repeating-payload       use repeating pattern in payload, instead of
+                            randomized payload (like in iperf2)
+  --dont-fragment           set IPv4 Don't Fragment flag
+  --username                username for authentication
+  --rsa-public-key-path     path to the RSA public key used to encrypt
+                            authentication credentials
+
+[KMG] indicates options that support a K/M/G suffix for kilo-, mega-, or giga-
+
+iperf3 homepage at: https://software.es.net/iperf/
+Report bugs to:     https://github.com/esnet/iperf
+/benchmark/bin # [6niperf3 [J[J[J[J[J[J[J./iperf3 -s -D -p 5210[J[J01[J[J[J[J8080
+/benchmark/bin # [6nifconfgi
+/bin/sh: ifconfgi: not found
+/benchmark/bin # [6niuf[J[Jfconfig
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:15 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:698 (698.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:17 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:782 (782.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:17 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:782 (782.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:17 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:782 (782.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:18 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:824 (824.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:18 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:824 (824.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:18 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:824 (824.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J/benchmark/bin # ifconfgi[J/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:19 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:866 (866.0 B)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6nauto etho0
+/bin/sh: auto: not found
+/benchmark/bin # [6nip 
+BusyBox v1.30.1 (Ubuntu 1:1.30.1-7ubuntu3) multi-call binary.
+
+Usage: ip [OPTIONS] address|route|link|tunnel|neigh|rule [ARGS]
+
+OPTIONS := -f[amily] inet|inet6|link | -o[neline]
+
+ip addr add|del IFADDR dev IFACE | show|flush [dev IFACE] [to PREFIX]
+ip route list|flush|add|del|change|append|replace|test ROUTE
+ip link set IFACE [up|down] [arp on|off] [multicast on|off]
+	[promisc on|off] [mtu NUM] [name NAME] [qlen NUM] [address MAC]
+	[master IFACE | nomaster]
+ip tunnel add|change|del|show [NAME]
+	[mode ipip|gre|sit] [remote ADDR] [local ADDR] [ttl TTL]
+ip neigh show|flush [to PREFIX] [dev DEV] [nud STATE]
+ip rule [list] | add|del SELECTOR ACTION
+/benchmark/bin # [6nip rule[J[J[J[Jaddr add
+ip: need "dev IFACE"
+/benchmark/bin # [6n/benchmark/bin # ip addr add[J etho[J0
+ip: need "dev IFACE"
+/benchmark/bin # [6n/benchmark/bin # ip addr add eth0[Jdeth0eeth0veth0 eth0eth0
+ip: RTNETLINK answers: Operation not supported
+/benchmark/bin # [6n/benchmark/bin # ip addr add dev eth0[J[J[J[J[J[J[J[J[J[J[J[J[J[J[J[J[J[J[J[J[Jifconfig
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:30 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1396 (1.3 KiB)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig[J --help
+BusyBox v1.30.1 (Ubuntu 1:1.30.1-7ubuntu3) multi-call binary.
+
+Usage: ifconfig [-a] interface [address]
+
+Configure a network interface
+
+	[add ADDRESS[/PREFIXLEN]]
+	[del ADDRESS[/PREFIXLEN]]
+	[[-]broadcast [ADDRESS]] [[-]pointopoint [ADDRESS]]
+	[netmask ADDRESS] [dstaddr ADDRESS]
+	[outfill NN] [keepalive NN]
+	[hw ether|infiniband ADDRESS] [metric NN] [mtu NN]
+	[[-]trailers] [[-]arp] [[-]allmulti]
+	[multicast] [[-]promisc] [txqueuelen NN] [[-]dynamic]
+	[mem_start NN] [io_addr NN] [irq NN]
+	[up|down] ...
+/benchmark/bin # [6nipcofngi[J[J[Jig etho0
+/bin/sh: ipcofig: not found
+/benchmark/bin # [6n/benchmark/bin # ipcofig etho0[J[J[J0
+/bin/sh: ipcofig: not found
+/benchmark/bin # [6n/benchmark/bin # ipcofig eth0[J[J[J[J[J[J[J[J[J[J[J[J[Jifconfig tho0[J[J[J[Jethi[J0
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:30 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1396 (1.3 KiB)  TX bytes:602 (602.0 B)
+
+/benchmark/bin # [6n/benchmark/bin # ifconfig eth0[J up
+/benchmark/bin # [6n/benchmark/bin # ifconfig eth0 up[J[J[J[Jdhclient 
+ifconfig: eth0dhclient: error fetching interface information: Device not found
+/benchmark/bin # [6ndhclient 
+/bin/sh: dhclient: not found
+/benchmark/bin # [6nifcae[J[J[J[J[Jiface
+/bin/sh: iface: not found
+/benchmark/bin # [6nip[Jfoncifg eho[J[J[J[J
+/bin/sh: ifoncifg: not found
+/benchmark/bin # [6nifo[Jconfig eth0 inet4 dhcp
+ifconfig: bad address 'inet4'
+/benchmark/bin # [6n/benchmark/bin # ifconfig eth0 inet4 dhcp[J[J[J[J[J[J[J[J[J[J[J10.0.2.15
+/benchmark/bin # [6nic[Jfconfig
+eth0      Link encap:Ethernet  HWaddr 52:54:00:12:34:56  
+          inet addr:10.0.2.15  Bcast:10.255.255.255  Mask:255.0.0.0
+          inet6 addr: fe80::5054:ff:fe12:3456/64 Scope:Link
+          inet6 addr: fec0::5054:ff:fe12:3456/64 Scope:Site
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:31 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1506 (1.4 KiB)  TX bytes:602 (602.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:8 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:8 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:520 (520.0 B)  TX bytes:520 (520.0 B)
+
+/benchmark/bin # [6nx[Jiperf3 -s 
+/bin/sh: iperf3: not found
+/benchmark/bin # [6n./iperf3 -s
+-----------------------------------------------------------
+Server listening on 5201 (test #1)
+-----------------------------------------------------------
+Accepted connection from 10.0.2.2, port 55128
+[  5] local 10.0.2.15 port 5201 connected to 10.0.2.2 port 55136
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-1.00   sec   959 MBytes  8.04 Gbits/sec                  
+[  5]   1.00-2.00   sec   954 MBytes  8.00 Gbits/sec                  
+[  5]   2.00-3.00   sec   957 MBytes  8.03 Gbits/sec                  
+[  5]   3.00-4.00   sec   957 MBytes  8.03 Gbits/sec                  
+[  5]   4.00-5.00   sec   957 MBytes  8.03 Gbits/sec                  
+[  5]   5.00-6.00   sec   954 MBytes  8.01 Gbits/sec                  
+[  5]   6.00-7.00   sec   948 MBytes  7.95 Gbits/sec                  
+[  5]   7.00-8.00   sec   958 MBytes  8.03 Gbits/sec                  
+[  5]   8.00-9.00   sec   965 MBytes  8.09 Gbits/sec                  
+[  5]   9.00-10.00  sec   961 MBytes  8.07 Gbits/sec                  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate
+[  5]   0.00-10.00  sec  9.35 GBytes  8.03 Gbits/sec                  receiver
+-----------------------------------------------------------
+Server listening on 5201 (test #2)
+-----------------------------------------------------------
