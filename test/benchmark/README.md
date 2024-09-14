@@ -84,7 +84,8 @@ To add a new benchmark to the Asternias Continuous Integration (CI) system, foll
         "result_index": "3",
         "description": "lat_syscall null",
         "title": "[Process] The cost of getpid",
-        "show_in_overview": "false"
+        "show_in_overview": "false",
+        "benchmark_type": "host-guest"
       } 
      ```
      
@@ -95,6 +96,10 @@ To add a new benchmark to the Asternias Continuous Integration (CI) system, foll
     - `description`: Provide a brief description of the benchmark.
     - `title`: Set the title of the benchmark.
     - `show_in_overview`: Default is true. Set to `false` to avoid displaying the benchmark in the overview results.
+    - `benchmark_type`: This parameter defines the type of benchmark to be executed. The default value is `guest`. The available options include `guest`, `guest-guest`, and `host-guest`.
+      - `guest`: Use this option when the benchmark is intended solely for the guest environment.
+      - `guest-guest`: Select this option when the benchmark involves interactions between multiple guest environments. In this case, you should launch additional guests as per your requirements.
+      - `host-guest`: Choose this option when the benchmark involves both the host and guest environments. When using this option, you will need to define your own `host.sh` and `*_bench_runner.sh` scripts to handle the host-side operations and benchmark execution.
 
     For example, if the benchmark output is "Syscall average latency: 1000 ns", the `search_pattern` is "Syscall average latency:", and the `result_index` is "4". `awk` will extract "1000" as the benchmark result. See the `awk` [manual](https://www.gnu.org/software/gawk/manual/gawk.html#Getting-Started) for more information.
 
