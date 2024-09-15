@@ -1,0 +1,428 @@
+From a9a0628698e5cc7f56e75fc31588d1e863b86ab8 Mon Sep 17 00:00:00 2001
+From: Fabing Li <lifabing.lfb@antgroup.com>
+Date: Sat, 14 Sep 2024 13:15:00 +0800
+Subject: [PATCH] Add iperf3 benchmark
+
+---
+ .github/workflows/benchmark_asterinas.yml     |   4 +-
+ test/benchmark/README.md                      |   7 +-
+ test/benchmark/bench_linux_and_aster.sh       | 146 +++++++++++++-----
+ test/benchmark/common/bench_runner.sh         |   9 +-
+ test/benchmark/iperf3/iperf3_bench_runner.sh  |  38 +++++
+ test/benchmark/iperf3/tcp_bw/config.json      |  10 ++
+ test/benchmark/iperf3/tcp_bw/host.sh          |   8 +
+ .../iperf3/tcp_bw/result_template.json        |  14 ++
+ test/benchmark/iperf3/tcp_bw/run.sh           |   8 +
+ tools/qemu_args.sh                            |   5 +-
+ 10 files changed, 205 insertions(+), 44 deletions(-)
+ create mode 100755 test/benchmark/iperf3/iperf3_bench_runner.sh
+ create mode 100644 test/benchmark/iperf3/tcp_bw/config.json
+ create mode 100755 test/benchmark/iperf3/tcp_bw/host.sh
+ create mode 100644 test/benchmark/iperf3/tcp_bw/result_template.json
+ create mode 100644 test/benchmark/iperf3/tcp_bw/run.sh
+
+diff --git a/.github/workflows/benchmark_asterinas.yml b/.github/workflows/benchmark_asterinas.yml
+index ef21f33d..b713645d 100644
+--- a/.github/workflows/benchmark_asterinas.yml
++++ b/.github/workflows/benchmark_asterinas.yml
+@@ -61,6 +61,7 @@ jobs:
+           - lmbench/tcp_loopback_select_lat
+           - lmbench/tcp_loopback_http_bw
+           - lmbench/udp_loopback_lat
++          - iperf3/tcp_bw
+       fail-fast: false
+     timeout-minutes: 60
+     container: 
+@@ -89,7 +90,8 @@ jobs:
+         max_attempts: 3
+         command: |
+           make install_osdk
+-          bash test/benchmark/bench_linux_and_aster.sh ${{ matrix.benchmark }}
++          BENCHMARK_TYPE=$(jq -r '.benchmark_type' test/benchmark/${{ matrix.benchmark }}/config.json)
++          bash test/benchmark/bench_linux_and_aster.sh ${{ matrix.benchmark }} $BENCHMARK_TYPE
+ 
+     - name: Set up benchmark configuration
+       run: |
+diff --git a/test/benchmark/README.md b/test/benchmark/README.md
+index 7de2da06..f864ca49 100644
+--- a/test/benchmark/README.md
++++ b/test/benchmark/README.md
+@@ -84,7 +84,8 @@ To add a new benchmark to the Asternias Continuous Integration (CI) system, foll
+         "result_index": "3",
+         "description": "lat_syscall null",
+         "title": "[Process] The cost of getpid",
+-        "show_in_overview": "false"
++        "show_in_overview": "false",
++        "benchmark_type": "host-guest"
+       } 
+      ```
+      
+@@ -95,6 +96,10 @@ To add a new benchmark to the Asternias Continuous Integration (CI) system, foll
+     - `description`: Provide a brief description of the benchmark.
+     - `title`: Set the title of the benchmark.
+     - `show_in_overview`: Default is true. Set to `false` to avoid displaying the benchmark in the overview results.
++    - `benchmark_type`: This parameter defines the type of benchmark to be executed. The default value is `guest`. The available options include `guest`, `guest-guest`, and `host-guest`.
++      - `guest`: Use this option when the benchmark is intended solely for the guest environment.
++      - `guest-guest`: Select this option when the benchmark involves interactions between multiple guest environments. In this case, you should launch additional guests as per your requirements.
++      - `host-guest`: Choose this option when the benchmark involves both the host and guest environments. When using this option, you will need to define your own `host.sh` and `*_bench_runner.sh` scripts to handle the host-side operations and benchmark execution.
+ 
+     For example, if the benchmark output is "Syscall average latency: 1000 ns", the `search_pattern` is "Syscall average latency:", and the `result_index` is "4". `awk` will extract "1000" as the benchmark result. See the `awk` [manual](https://www.gnu.org/software/gawk/manual/gawk.html#Getting-Started) for more information.
+ 
+diff --git a/test/benchmark/bench_linux_and_aster.sh b/test/benchmark/bench_linux_and_aster.sh
+index 886e40df..4bc6812a 100755
+--- a/test/benchmark/bench_linux_and_aster.sh
++++ b/test/benchmark/bench_linux_and_aster.sh
+@@ -23,24 +23,42 @@ prepare_libs() {
+     # Download the Linux kernel and modules
+     mkdir -p "${LINUX_DEPENDENCIES_DIR}"
+ 
+-    if [ ! -f "${LINUX_KERNEL}" ]; then
+-        echo "Downloading the Linux kernel image..."
+-        ${WGET_SCRIPT} "${LINUX_KERNEL}" "https://raw.githubusercontent.com/asterinas/linux_binary_cache/8a5b6fd/vmlinuz-${LINUX_KERNEL_VERSION}" || {
+-            echo "Failed to download the Linux kernel image."
+-            exit 1
+-        }
+-    fi
+-    if [ ! -f "${LINUX_DEPENDENCIES_DIR}/virtio_blk.ko" ]; then
+-        echo "Downloading the virtio_blk kernel module..."
+-        ${WGET_SCRIPT} "${LINUX_DEPENDENCIES_DIR}/virtio_blk.ko" "https://raw.githubusercontent.com/asterinas/linux_binary_cache/8a5b6fd/kernel/drivers/block/virtio_blk.ko" || {
+-            echo "Failed to download the Linux kernel module."
+-            exit 1
+-        }
+-    fi
++    # Array of files to download and their URLs
++    declare -A files=(
++        ["${LINUX_KERNEL}"]="https://raw.githubusercontent.com/asterinas/linux_binary_cache/8a5b6fd/vmlinuz-${LINUX_KERNEL_VERSION}"
++        ["${LINUX_DEPENDENCIES_DIR}/virtio_blk.ko"]="https://raw.githubusercontent.com/asterinas/linux_binary_cache/8a5b6fd/kernel/drivers/block/virtio_blk.ko"
++        ["${LINUX_DEPENDENCIES_DIR}/virtio_net.ko"]="https://raw.githubusercontent.com/asterinas/linux_binary_cache/8a5b6fd/kernel/drivers/net/virtio_net.ko"
++        ["${LINUX_DEPENDENCIES_DIR}/net_failover.ko"]="https://raw.githubusercontent.com/asterinas/linux_binary_cache/8a5b6fd/kernel/drivers/net/net_failover.ko"
++        ["${LINUX_DEPENDENCIES_DIR}/failover.ko"]="https://raw.githubusercontent.com/asterinas/linux_binary_cache/8a5b6fd/kernel/net/core/failover.ko"
++    )
++
++    # Download files if they don't exist
++    for file in "${!files[@]}"; do
++        if [ ! -f "$file" ]; then
++            echo "Downloading ${file##*/}..."
++            ${WGET_SCRIPT} "$file" "${files[$file]}" || {
++                echo "Failed to download ${file##*/}."
++                exit 1
++            }
++        fi
++    done
++
+     # Copy the kernel modules to the initramfs directory
+     if [ ! -f "${LINUX_MODULES_DIR}/drivers/block/virtio_blk.ko" ]; then
+         mkdir -p "${LINUX_MODULES_DIR}/drivers/block"
+-        cp ${LINUX_DEPENDENCIES_DIR}/virtio_blk.ko "${LINUX_MODULES_DIR}/drivers/block/virtio_blk.ko" 
++        mkdir -p "${LINUX_MODULES_DIR}/drivers/net"
++        mkdir -p "${LINUX_MODULES_DIR}/net/core"
++
++        declare -A modules=(
++            ["${LINUX_DEPENDENCIES_DIR}/virtio_blk.ko"]="${LINUX_MODULES_DIR}/drivers/block/virtio_blk.ko"
++            ["${LINUX_DEPENDENCIES_DIR}/virtio_net.ko"]="${LINUX_MODULES_DIR}/drivers/net/virtio_net.ko"
++            ["${LINUX_DEPENDENCIES_DIR}/net_failover.ko"]="${LINUX_MODULES_DIR}/drivers/net/net_failover.ko"
++            ["${LINUX_DEPENDENCIES_DIR}/failover.ko"]="${LINUX_MODULES_DIR}/net/core/failover.ko"
++        )
++
++        for src in "${!modules[@]}"; do
++            sudo cp "$src" "${modules[$src]}"
++        done
+     fi
+ }
+ 
+@@ -80,39 +98,83 @@ parse_results() {
+ # Run the benchmark on Linux and Asterinas
+ run_benchmark() {
+     local benchmark="$1"
+-    local search_pattern="$2"
+-    local result_index="$3"
++    local benchmark_type="$2"
++    local search_pattern="$3"
++    local result_index="$4"
+ 
+     local linux_output="${BENCHMARK_DIR}/linux_output.txt"
+     local aster_output="${BENCHMARK_DIR}/aster_output.txt"
+     local result_template="${BENCHMARK_DIR}/${benchmark}/result_template.json"
+     local benchmark_name=$(basename "${benchmark}")
++    local benchmark_root=$(dirname "${benchmark}")
+     local result_file="result_${benchmark_name}.json"
+     
+     echo "Preparing libraries..."
+     prepare_libs
+ 
+-    local asterinas_cmd="make run BENCHMARK=${benchmark} ENABLE_KVM=1 RELEASE_LTO=1 2>&1 | tee ${aster_output}"
+-    echo "Running benchmark ${benchmark} on Asterinas..."
+-    eval "$asterinas_cmd"
+-
+-    prepare_fs
+-    local linux_cmd="/usr/local/qemu/bin/qemu-system-x86_64 \
+-        --no-reboot \
+-        -smp 1 \
+-        -m 8G \
+-        -machine q35,kernel-irqchip=split \
+-        -cpu Icelake-Server,-pcid,+x2apic \
+-        --enable-kvm \
+-        -kernel ${LINUX_KERNEL} \
+-        -initrd ${BENCHMARK_DIR}/../build/initramfs.cpio.gz \
+-        -drive if=none,format=raw,id=x0,file=${BENCHMARK_DIR}/../build/ext2.img \
+-        -device virtio-blk-pci,bus=pcie.0,addr=0x6,drive=x0,serial=vext2,disable-legacy=on,disable-modern=off,queue-size=64,num-queues=1,config-wce=off,request-merging=off,write-cache=off,backend_defaults=off,discard=off,event_idx=off,indirect_desc=off,ioeventfd=off,queue_reset=off \
+-        -append 'console=ttyS0 rdinit=/benchmark/common/bench_runner.sh ${benchmark} linux mitigations=off hugepages=0 transparent_hugepage=never' \
+-        -nographic \
+-        2>&1 | tee ${linux_output}"
+-    echo "Running benchmark ${benchmark} on Linux..."
+-    eval "$linux_cmd"
++    case "${benchmark_type}" in
++        "guest")
++            local asterinas_cmd="make run BENCHMARK=${benchmark} ENABLE_KVM=1 RELEASE_LTO=1 2>&1 | tee ${aster_output}"
++            prepare_fs
++            local linux_cmd="/usr/local/qemu/bin/qemu-system-x86_64 \
++                --no-reboot \
++                -smp 1 \
++                -m 8G \
++                -machine q35,kernel-irqchip=split \
++                -cpu Icelake-Server,-pcid,+x2apic \
++                --enable-kvm \
++                -kernel ${LINUX_KERNEL} \
++                -initrd ${BENCHMARK_DIR}/../build/initramfs.cpio.gz \
++                -drive if=none,format=raw,id=x0,file=${BENCHMARK_DIR}/../build/ext2.img \
++                -device virtio-blk-pci,bus=pcie.0,addr=0x6,drive=x0,serial=vext2,disable-legacy=on,disable-modern=off,queue-size=64,num-queues=1,config-wce=off,request-merging=off,write-cache=off,backend_defaults=off,discard=off,event_idx=off,indirect_desc=off,ioeventfd=off,queue_reset=off \
++                -append 'console=ttyS0 rdinit=/benchmark/common/bench_runner.sh ${benchmark} linux mitigations=off hugepages=0 transparent_hugepage=never' \
++                -netdev user,id=net01,hostfwd=tcp::5201-:5201 \
++                -device virtio-net-pci,netdev=net01,disable-legacy=on,disable-modern=off \
++                -nographic \
++                2>&1 | tee ${linux_output}"
++            echo "Running benchmark ${benchmark} on Asterinas..."
++            eval "$asterinas_cmd"
++            echo "Running benchmark ${benchmark} on Linux..."
++            eval "$linux_cmd"
++            ;;
++        "host-guest")
++            echo "Running benchmark ${benchmark} on host and guest..."
++            local asterinas_guest_cmd="make run BENCHMARK=${benchmark} ENABLE_KVM=1 RELEASE_LTO=1 2>&1 | tee ${aster_output}"
++            prepare_fs
++            local linux_guest_cmd="/usr/local/qemu/bin/qemu-system-x86_64 \
++                --no-reboot \
++                -smp 1 \
++                -m 8G \
++                -machine q35,kernel-irqchip=split \
++                -cpu Icelake-Server,-pcid,+x2apic \
++                --enable-kvm \
++                -kernel ${LINUX_KERNEL} \
++                -initrd ${BENCHMARK_DIR}/../build/initramfs.cpio.gz \
++                -drive if=none,format=raw,id=x0,file=${BENCHMARK_DIR}/../build/ext2.img \
++                -device virtio-blk-pci,bus=pcie.0,addr=0x6,drive=x0,serial=vext2,disable-legacy=on,disable-modern=off,queue-size=64,num-queues=1,config-wce=off,request-merging=off,write-cache=off,backend_defaults=off,discard=off,event_idx=off,indirect_desc=off,ioeventfd=off,queue_reset=off \
++                -append 'console=ttyS0 rdinit=/benchmark/common/bench_runner.sh ${benchmark} linux mitigations=off hugepages=0 transparent_hugepage=never' \
++                -netdev user,id=net01,hostfwd=tcp::5201-:5201 \
++                -device virtio-net-pci,netdev=net01,disable-legacy=on,disable-modern=off \
++                -nographic \
++                2>&1"
++            bash "${BENCHMARK_DIR}/${benchmark_root}/${benchmark_root}_bench_runner.sh" \
++                "${BENCHMARK_DIR}/${benchmark}" \
++                "${asterinas_guest_cmd}" \
++                "${linux_guest_cmd}" \
++                "${aster_output}" \
++                "${linux_output}"
++            ;;
++        "guest-guest")
++            echo "Running benchmark ${benchmark} between guests..."
++            echo "TODO"
++            exit 1
++            ;;
++        *)
++            echo "Error: Unknown benchmark type '${benchmark_type}'" >&2
++            exit 1
++            ;;
++    esac
++
+ 
+     echo "Parsing results..."
+     parse_results "$benchmark" "$search_pattern" "$result_index" "$linux_output" "$aster_output" "$result_template" "$result_file"
+@@ -125,6 +187,12 @@ run_benchmark() {
+ # Main
+ 
+ BENCHMARK="$1"
++if [ -z "$2" ] || [ "$2" = "null" ]; then
++    BENCHMARK_TYPE="guest"
++else
++    BENCHMARK_TYPE="$2"
++fi
++
+ 
+ echo "Running benchmark ${BENCHMARK}..."
+ pwd
+@@ -136,6 +204,6 @@ fi
+ search_pattern=$(jq -r '.search_pattern' "$BENCHMARK_DIR/$BENCHMARK/config.json")
+ result_index=$(jq -r '.result_index' "$BENCHMARK_DIR/$BENCHMARK/config.json")
+ 
+-run_benchmark "$BENCHMARK" "$search_pattern" "$result_index"
++run_benchmark "$BENCHMARK" "$BENCHMARK_TYPE" "$search_pattern" "$result_index"
+ 
+ echo "Benchmark completed successfully."
+diff --git a/test/benchmark/common/bench_runner.sh b/test/benchmark/common/bench_runner.sh
+index d98ba01e..678d5302 100755
+--- a/test/benchmark/common/bench_runner.sh
++++ b/test/benchmark/common/bench_runner.sh
+@@ -8,7 +8,8 @@ set -e
+ BENCHMARK_DIR="/benchmark"
+ 
+ BENCH_NAME=$1
+-SYSTEM=$2
++SYSTEM="${2:-asterinas}"
++echo "Running benchmark: ${BENCH_NAME} on ${SYSTEM}"
+ 
+ print_help() {
+     echo "Usage: $0 <benchmark_name> <system_type>"
+@@ -44,7 +45,13 @@ prepare_system() {
+     if [ "$SYSTEM" = "linux" ]; then
+         mount -t devtmpfs devtmpfs /dev
+         ip link set lo up
++        modprobe failover
++        modprobe net_failover
++        modprobe virtio_net
+         modprobe virtio_blk
++        ip link set eth0 up
++        ifconfig eth0 10.0.2.15
++        # mkfs.ext2 -F /dev/vda
+         mount -t ext2 /dev/vda /ext2
+     elif [ "$SYSTEM" = "asterinas" ]; then
+         # Asterinas-specific preparation (if any)
+diff --git a/test/benchmark/iperf3/iperf3_bench_runner.sh b/test/benchmark/iperf3/iperf3_bench_runner.sh
+new file mode 100755
+index 00000000..e96dec4e
+--- /dev/null
++++ b/test/benchmark/iperf3/iperf3_bench_runner.sh
+@@ -0,0 +1,38 @@
++#!/bin/bash
++
++# SPDX-License-Identifier: MPL-2.0
++
++set -e
++
++BENCHMARK_PATH=$1
++ASTERINAS_GUEST_CMD=$2
++LINUX_GUEST_CMD=$3
++ASTERINAS_OUTPUT=$4
++LINUX_OUTPUT=$5
++
++# Function to run the benchmark
++# Parameters:
++#   $1: guest command to run on the VM
++#   $2: output file to store the benchmark results
++#   $3: sleep time before running the host command
++run_benchmark() {
++    local guest_cmd=$1
++    local output_file=$2
++    local sleep_time=$3
++
++    echo "Running the benchmark on the VM..."
++    eval "${guest_cmd}" &
++    sleep "${sleep_time}"
++    # Run the host command and save the output to the specified file.
++    # You can also redirect the guest output to it.
++    echo "Running the benchmark on the host..."
++    bash "${BENCHMARK_PATH}/host.sh" | tee "${output_file}"
++}
++
++# Run the benchmark on the Asterinas VM
++# Use a sleep time of 2 minutes (2m) for the Asterinas VM
++run_benchmark "${ASTERINAS_GUEST_CMD}" "${ASTERINAS_OUTPUT}" "2m"
++
++# Run the benchmark on the Linux VM
++# Use a sleep time of 20 seconds (20s) for the Linux VM
++run_benchmark "${LINUX_GUEST_CMD}" "${LINUX_OUTPUT}" "20s"
+\ No newline at end of file
+diff --git a/test/benchmark/iperf3/tcp_bw/config.json b/test/benchmark/iperf3/tcp_bw/config.json
+new file mode 100644
+index 00000000..c85e7209
+--- /dev/null
++++ b/test/benchmark/iperf3/tcp_bw/config.json
+@@ -0,0 +1,10 @@
++{
++    "alert_threshold": "130%",
++    "alert_tool": "customBiggerIsBetter",
++    "search_pattern": "sender",
++    "result_index": "7",
++    "description": "iperf3 -s -B 10.0.2.15",
++    "title": "[Network] iperf3 sender performance",
++    "benchmark_type": "host-guest",
++    "show_in_overview": "false"
++}
+\ No newline at end of file
+diff --git a/test/benchmark/iperf3/tcp_bw/host.sh b/test/benchmark/iperf3/tcp_bw/host.sh
+new file mode 100755
+index 00000000..51dbc3db
+--- /dev/null
++++ b/test/benchmark/iperf3/tcp_bw/host.sh
+@@ -0,0 +1,8 @@
++#!/bin/sh
++
++# SPDX-License-Identifier: MPL-2.0
++
++set -e
++
++/usr/local/benchmark/iperf/bin/iperf3 -c 127.0.0.1 -f m
++pgrep qemu | xargs kill
+\ No newline at end of file
+diff --git a/test/benchmark/iperf3/tcp_bw/result_template.json b/test/benchmark/iperf3/tcp_bw/result_template.json
+new file mode 100644
+index 00000000..7517f57d
+--- /dev/null
++++ b/test/benchmark/iperf3/tcp_bw/result_template.json
+@@ -0,0 +1,14 @@
++[
++    {
++        "name": "Average Bandwidth between Host Linux and Guest Linux",
++        "unit": "Mbits/sec",
++        "value": 0,
++        "extra": "linux_result"
++    },
++    {
++        "name": "Average Bandwidth between Host Linux and Guest Asterinas",
++        "unit": "Mbits/sec",
++        "value": 0,
++        "extra": "aster_result"
++    }
++]
+\ No newline at end of file
+diff --git a/test/benchmark/iperf3/tcp_bw/run.sh b/test/benchmark/iperf3/tcp_bw/run.sh
+new file mode 100644
+index 00000000..b0575876
+--- /dev/null
++++ b/test/benchmark/iperf3/tcp_bw/run.sh
+@@ -0,0 +1,8 @@
++#!/bin/sh
++
++# SPDX-License-Identifier: MPL-2.0
++
++set -e
++
++echo "Running iperf3 server..."
++/benchmark/bin/iperf3 -s -B 10.0.2.15
+\ No newline at end of file
+diff --git a/tools/qemu_args.sh b/tools/qemu_args.sh
+index 61220141..3754e780 100755
+--- a/tools/qemu_args.sh
++++ b/tools/qemu_args.sh
+@@ -10,8 +10,9 @@
+ SSH_RAND_PORT=$(shuf -i 1024-65535 -n 1)
+ NGINX_RAND_PORT=$(shuf -i 1024-65535 -n 1)
+ REDIS_RAND_PORT=$(shuf -i 1024-65535 -n 1)
++IPERF_PORT=5201
+ 
+-echo "[$1] Forwarded QEMU guest port: $SSH_RAND_PORT->22; $NGINX_RAND_PORT->8080 $REDIS_RAND_PORT->6379" 1>&2
++echo "[$1] Forwarded QEMU guest port: $SSH_RAND_PORT->22; $NGINX_RAND_PORT->8080 $REDIS_RAND_PORT->6379 $IPERF_PORT->5201" 1>&2
+ 
+ COMMON_QEMU_ARGS="\
+     -cpu Icelake-Server,+x2apic \
+@@ -23,7 +24,7 @@ COMMON_QEMU_ARGS="\
+     -serial chardev:mux \
+     -monitor chardev:mux \
+     -chardev stdio,id=mux,mux=on,signal=off,logfile=qemu.log \
+-    -netdev user,id=net01,hostfwd=tcp::$SSH_RAND_PORT-:22,hostfwd=tcp::$NGINX_RAND_PORT-:8080,hostfwd=tcp::$REDIS_RAND_PORT-:6379 \
++    -netdev user,id=net01,hostfwd=tcp::$SSH_RAND_PORT-:22,hostfwd=tcp::$NGINX_RAND_PORT-:8080,hostfwd=tcp::$REDIS_RAND_PORT-:6379,hostfwd=tcp::$IPERF_PORT-:5201 \
+     -object filter-dump,id=filter0,netdev=net01,file=virtio-net.pcap \
+     -device isa-debug-exit,iobase=0xf4,iosize=0x04 \
+     -drive if=none,format=raw,id=x0,file=./test/build/ext2.img \
+-- 
+2.34.1
+
