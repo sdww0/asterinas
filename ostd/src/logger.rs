@@ -15,9 +15,9 @@ use alloc::format;
 use log::{LevelFilter, Metadata, Record};
 
 use crate::{
-    arch::timer::Jiffies,
     boot::{kcmdline::ModuleArg, kernel_cmdline},
     early_println,
+    timer::Jiffies,
 };
 
 const LOGGER: Logger = Logger {};

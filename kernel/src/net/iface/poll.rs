@@ -4,7 +4,7 @@ use alloc::sync::Arc;
 use core::time::Duration;
 
 use log::trace;
-use ostd::{arch::timer::Jiffies, task::Priority};
+use ostd::{task::Priority, timer::Jiffies};
 
 use super::{ext::IfaceEx, Iface, IFACES};
 use crate::{
