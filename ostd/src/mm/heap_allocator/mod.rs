@@ -89,7 +89,7 @@ unsafe impl GlobalAlloc for LockedHeapWithRescue {
 fn rescue(heap: &mut SpinLockGuard<Heap, LocalIrqDisabled>, layout: &Layout) -> Result<()> {
     const MIN_NUM_FRAMES: usize = 0x4000000 / PAGE_SIZE; // 64MB
 
-    debug!("enlarge heap, layout = {:?}", layout);
+    // debug!("enlarge heap, layout = {:?}", layout);
     let mut num_frames = {
         let align = PAGE_SIZE.max(layout.align());
         debug_assert!(align % PAGE_SIZE == 0);
@@ -118,11 +118,11 @@ fn rescue(heap: &mut SpinLockGuard<Heap, LocalIrqDisabled>, layout: &Layout) -> 
     // SAFETY: the frame is allocated from FrameAllocator and never be deallocated,
     // so the addr is always valid.
     unsafe {
-        debug!(
-            "add frames to heap: addr = 0x{:x}, size = 0x{:x}",
-            vaddr,
-            PAGE_SIZE * num_frames
-        );
+        // debug!(
+        //     "add frames to heap: addr = 0x{:x}, size = 0x{:x}",
+        //     vaddr,
+        //     PAGE_SIZE * num_frames
+        // );
         heap.add_memory(vaddr, PAGE_SIZE * num_frames);
     }
 
