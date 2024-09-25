@@ -17,7 +17,7 @@ use quote::ToTokens;
 /// OSTD shares the same version with OSDK, so just use the version of OSDK here.
 pub const OSTD_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub fn ostd_dep() -> String {
-    format!("ostd = {{ version = \"{}\" }}", OSTD_VERSION)
+    format!("ostd = {{ path = \"/root/asterinas/ostd\" }}")
 }
 
 fn cargo() -> Command {
