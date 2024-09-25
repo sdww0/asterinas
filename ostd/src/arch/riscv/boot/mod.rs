@@ -35,21 +35,20 @@ fn init_kernel_commandline(kernel_cmdline: &'static Once<KCmdlineArg>) {
 }
 
 fn init_initramfs(initramfs: &'static Once<&'static [u8]>) {
-    let chosen = DEVICE_TREE.get().unwrap().find_node("/chosen").unwrap();
-    let initrd_start = chosen
-        .property("linux,initrd-start")
-        .unwrap()
-        .as_usize()
-        .unwrap();
-    let initrd_end = chosen
-        .property("linux,initrd-end")
-        .unwrap()
-        .as_usize()
-        .unwrap();
+    if let Some((initrd_start, initrd_end)) = return_err_initramfs() {
+        let base_va = paddr_to_vaddr(initrd_start);
+        let length = initrd_end - initrd_start;
+        initramfs
+            .call_once(|| unsafe { core::slice::from_raw_parts(base_va as *const u8, length) });
+    }
+}
 
-    let base_va = paddr_to_vaddr(initrd_start);
-    let length = initrd_end - initrd_start;
-    initramfs.call_once(|| unsafe { core::slice::from_raw_parts(base_va as *const u8, length) });
+fn return_err_initramfs() -> Option<(usize, usize)> {
+    let chosen = DEVICE_TREE.get()?.find_node("/chosen")?;
+    let initrd_start = chosen.property("linux,initrd-start")?.as_usize()?;
+    let initrd_end = chosen.property("linux,initrd-end")?.as_usize()?;
+
+    Some((initrd_start, initrd_end))
 }
 
 fn init_acpi_arg(acpi: &'static Once<BootloaderAcpiArg>) {
@@ -89,23 +88,14 @@ fn init_memory_regions(memory_regions: &'static Once<Vec<MemoryRegion>>) {
     regions.push(MemoryRegion::kernel());
 
     // Add the initramfs region.
-    let chosen = DEVICE_TREE.get().unwrap().find_node("/chosen").unwrap();
-    let initrd_start = chosen
-        .property("linux,initrd-start")
-        .unwrap()
-        .as_usize()
-        .unwrap();
-    let initrd_end = chosen
-        .property("linux,initrd-end")
-        .unwrap()
-        .as_usize()
-        .unwrap();
-    let length = initrd_end - initrd_start;
-    regions.push(MemoryRegion::new(
-        initrd_start,
-        length,
-        MemoryRegionType::Module,
-    ));
+    if let Some((initrd_start, initrd_end)) = return_err_initramfs() {
+        let length = initrd_end - initrd_start;
+        regions.push(MemoryRegion::new(
+            initrd_start,
+            length,
+            MemoryRegionType::Module,
+        ));
+    }
 
     memory_regions.call_once(|| non_overlapping_regions_from(regions.as_ref()));
 }
