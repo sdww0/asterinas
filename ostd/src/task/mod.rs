@@ -3,7 +3,7 @@
 //! Tasks are the unit of code execution.
 
 pub(crate) mod atomic_mode;
-mod kernel_stack;
+pub mod kernel_stack;
 mod preempt;
 mod processor;
 pub mod scheduler;
@@ -222,7 +222,7 @@ impl TaskOptions {
             scheduler::exit_current();
         }
 
-        let kstack = KernelStack::new_with_guard_page()?;
+        let kstack = KernelStack::new_without_guard_page()?;
 
         let mut ctx = SyncUnsafeCell::new(TaskContext::default());
         if let Some(user_space) = self.user_space.as_ref() {
