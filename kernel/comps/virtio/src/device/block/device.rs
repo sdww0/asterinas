@@ -86,6 +86,10 @@ impl aster_block::BlockDevice for BlockDevice {
             nr_sectors: VirtioBlockConfig::read_capacity_sectors(&self.device.config).unwrap(),
         }
     }
+
+    fn get_io_mem(&self) -> Option<IoMem> {
+        self.device.transport.lock().get_pci_common_cfg_io_mem()
+    }
 }
 
 #[derive(Debug)]

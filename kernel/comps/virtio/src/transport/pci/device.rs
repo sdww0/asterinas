@@ -68,6 +68,10 @@ impl VirtioTransport for VirtioPciTransport {
         self.device_type
     }
 
+    fn get_pci_common_cfg_io_mem(&self) -> Option<IoMem> {
+        Some(self.common_cfg.get_inner_clone())
+    }
+
     fn set_queue(
         &mut self,
         idx: u16,

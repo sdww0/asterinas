@@ -56,7 +56,7 @@ impl NetworkDevice {
         debug!("virtio_net_config = {:?}", virtio_net_config);
         debug!("features = {:?}", features);
 
-        let config = VirtioNetConfig::read(&virtio_net_config).unwrap();
+        let config: VirtioNetConfig = VirtioNetConfig::read(&virtio_net_config).unwrap();
         let mac_addr = config.mac;
         debug!("mac addr = {:x?}, status = {:?}", mac_addr, config.status);
         let caps = init_caps(&features, &config);
