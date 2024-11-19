@@ -5,7 +5,6 @@
 
 #![no_std]
 #![no_main]
-#![deny(unsafe_code)]
 #![allow(incomplete_features)]
 #![feature(btree_cursors)]
 #![feature(btree_extract_if)]
@@ -65,19 +64,24 @@ pub mod net;
 pub mod prelude;
 mod process;
 mod sched;
+pub mod speed;
 pub mod syscall;
 pub mod thread;
 pub mod time;
 mod util;
 pub(crate) mod vdso;
 pub mod vm;
+pub mod read_write;
+pub mod speedtest_v2;
 
 #[ostd::main]
 #[controlled]
 pub fn main() {
     ostd::early_println!("[kernel] OSTD initialized. Preparing components.");
     component::init_all(component::parse_metadata!()).unwrap();
-    init();
+    // init();
+    ostd::IN_BOOTSTRAP_CONTEXT.store(false, Ordering::Relaxed);
+    speedtest_v2::test();
 
     // Spawn all AP idle threads.
     ostd::boot::smp::register_ap_entry(ap_init);

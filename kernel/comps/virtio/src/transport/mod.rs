@@ -87,6 +87,10 @@ pub trait VirtioTransport: Sync + Send + Debug {
 
     fn is_legacy_version(&self) -> bool;
 
+    fn get_pci_common_cfg_io_mem(&self) -> Option<IoMem> {
+        None
+    }
+
     // ====================Device interrupt APIs=====================
 
     /// Registers a callback for queue interrupts.

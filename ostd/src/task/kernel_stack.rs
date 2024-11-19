@@ -64,7 +64,6 @@ impl KernelStack {
     }
 
     /// Generates a kernel stack without guard pages.
-    /// 4 additional pages are allocated and regarded as guard pages, which should not be accessed.
     pub fn new_without_guard_page() -> Result<Self> {
         let mut new_kvirt_area = KVirtArea::<Tracked>::new(KERNEL_STACK_SIZE);
         let mapped_start = new_kvirt_area.range().start;
