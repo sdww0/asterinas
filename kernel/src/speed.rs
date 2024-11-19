@@ -55,8 +55,7 @@ fn do_io_mem_test() {
         // while SystemTime::now().duration_since(&test).unwrap().as_secs() < 1{
         //     spin_loop();
         // }
-        let (u8_duration, u16_duration, u32_duration, u64_duration) =
-            unsafe { raw_memcpy_test() };
+        let (u8_duration, u16_duration, u32_duration, u64_duration) = unsafe { raw_memcpy_test() };
         durations[i] = u8_duration;
         durations[i + TEST_TIMES] = u16_duration;
         durations[i + 2 * TEST_TIMES] = u32_duration;
