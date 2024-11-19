@@ -1,5 +1,3 @@
-
-
 extern "C" {
     /// Copies `size` bytes from `src` to `dst`. This function works with exception handling
     /// and can recover from page fault.
@@ -10,6 +8,3 @@ extern "C" {
     /// Returns number of bytes that failed to set.
     pub(crate) fn __memset_fallible(dst: *mut u8, value: u8, size: usize) -> usize;
 }
-
-
-

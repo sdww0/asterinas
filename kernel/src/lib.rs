@@ -63,16 +63,16 @@ pub mod kcmdline;
 pub mod net;
 pub mod prelude;
 mod process;
+pub mod read_write;
 mod sched;
 pub mod speed;
+pub mod speedtest_v2;
 pub mod syscall;
 pub mod thread;
 pub mod time;
 mod util;
 pub(crate) mod vdso;
 pub mod vm;
-pub mod read_write;
-pub mod speedtest_v2;
 
 #[ostd::main]
 #[controlled]
