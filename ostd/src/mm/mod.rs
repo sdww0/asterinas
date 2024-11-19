@@ -30,12 +30,12 @@ pub use self::{
         Fallible, FallibleVmRead, FallibleVmWrite, Infallible, PodOnce, VmIo, VmIoOnce, VmReader,
         VmWriter,
     },
+    kspace::paddr_to_vaddr,
     page_prop::{CachePolicy, PageFlags, PageProperty},
     vm_space::VmSpace,
 };
 pub(crate) use self::{
-    kspace::paddr_to_vaddr, page::meta::init as init_page_meta, page_prop::PrivilegedPageFlags,
-    page_table::PageTable,
+    page::meta::init as init_page_meta, page_prop::PrivilegedPageFlags, page_table::PageTable,
 };
 use crate::arch::mm::PagingConsts;
 

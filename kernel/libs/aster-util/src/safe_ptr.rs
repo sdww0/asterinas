@@ -221,6 +221,12 @@ impl<T: Pod, M: VmIo, R: TRights> SafePtr<T, M, TRightSet<R>> {
     }
 }
 
+impl<T, M: Clone, R: TRights> SafePtr<T, M, TRightSet<R>> {
+    pub fn get_inner_clone(&self) -> M {
+        self.vm_obj.clone()
+    }
+}
+
 // =============== Read and write methods ==============
 impl<T: PodOnce, M: VmIoOnce, R: TRights> SafePtr<T, M, TRightSet<R>> {
     /// Reads the value from the pointer using one non-tearing instruction.

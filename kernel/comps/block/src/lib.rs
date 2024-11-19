@@ -42,7 +42,7 @@ mod prelude;
 pub mod request_queue;
 
 use component::{init_component, ComponentInitError};
-use ostd::sync::SpinLock;
+use ostd::{io_mem::IoMem, sync::SpinLock};
 use spin::Once;
 
 use self::{
@@ -59,6 +59,10 @@ pub trait BlockDevice: Send + Sync + Any + Debug {
 
     /// Returns the metadata of the block device.
     fn metadata(&self) -> BlockDeviceMeta;
+
+    fn get_io_mem(&self) -> Option<IoMem> {
+        None
+    }
 }
 
 /// Metadata for a block device.
