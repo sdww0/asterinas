@@ -163,6 +163,8 @@ fn init_thread() {
     } else {
         QemuExitCode::Failed
     };
+    ostd::output_file();
+    loop{}
     exit_qemu(exit_code);
 }
 

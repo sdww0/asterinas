@@ -47,8 +47,10 @@ pub mod timer;
 pub mod trap;
 pub mod user;
 
+use alloc::vec;
 use core::sync::atomic::AtomicBool;
 
+use arch::serial::CONSOLE_COM2_PORT;
 pub use ostd_macros::{main, panic_handler};
 pub use ostd_pod::Pod;
 
@@ -96,11 +98,51 @@ unsafe fn init() {
         mm::kspace::activate_kernel_page_table();
     }
 
+    minicov::reset_coverage();
     bus::init();
+
+    let mut res = vec![];
+
+    unsafe {
+        minicov::capture_coverage(&mut res);
+        minicov::reset_coverage();
+    }
+
+    early_println!("Result length:{}", res.len());
+
+    for i in res {
+        CONSOLE_COM2_PORT.send(i);
+    }
 
     arch::irq::enable_local();
 
     invoke_ffi_init_funcs();
+}
+
+pub fn output_file() {
+    let split = b"------\n";
+    for i in split {
+        CONSOLE_COM2_PORT.send(*i);
+    }
+
+    loop{
+        let mut res = vec![];
+
+        unsafe {
+            if minicov::capture_coverage(&mut res).is_err(){
+                break;
+            }
+            minicov::reset_coverage();
+        }
+    
+        early_println!("Result length:{}", res.len());
+    
+        for i in res {
+            CONSOLE_COM2_PORT.send(i);
+        }
+    }
+
+
 }
 
 /// Indicates whether the kernel is in bootstrap context.

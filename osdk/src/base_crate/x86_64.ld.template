@@ -58,10 +58,7 @@ SECTIONS
 # Here are the rest of the virtual memory sections which can be relocated.    #
 # --------------------------------------------------------------------------- #
 
-    .text                   : AT(ADDR(.text) - KERNEL_VMA) {
-        *(.text .text.*)
-        PROVIDE(__etext = .);
-    }
+
 
     # The section to store exception table (ExTable).
     # This table is used for recovering from specific exception handling faults

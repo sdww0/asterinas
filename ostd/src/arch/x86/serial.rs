@@ -53,6 +53,7 @@ bitflags::bitflags! {
 }
 
 static CONSOLE_COM1_PORT: SerialPort = unsafe { SerialPort::new(0x3F8) };
+pub static CONSOLE_COM2_PORT: SerialPort = unsafe { SerialPort::new(0x2F8) };
 
 static CONSOLE_IRQ_CALLBACK: Once<SpinLock<IrqLine>> = Once::new();
 static SERIAL_INPUT_CALLBACKS: SpinLock<Vec<Arc<InputCallback>>> = SpinLock::new(Vec::new());
@@ -60,6 +61,7 @@ static SERIAL_INPUT_CALLBACKS: SpinLock<Vec<Arc<InputCallback>>> = SpinLock::new
 /// Initializes the serial port.
 pub(crate) fn init() {
     CONSOLE_COM1_PORT.init();
+    CONSOLE_COM2_PORT.init();
 }
 
 pub(crate) fn callback_init() {

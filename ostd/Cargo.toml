@@ -17,7 +17,9 @@ targets = ["x86_64-unknown-none"]
 [dependencies]
 align_ext = { path = "libs/align_ext", version = "0.1.0" }
 bit_field = "0.10.1"
-buddy_system_allocator = { version = "0.10", default-features = false, features = ["alloc"] }
+buddy_system_allocator = { version = "0.10", default-features = false, features = [
+    "alloc",
+] }
 bitflags = "1.3"
 bitvec = { version = "1.0", default-features = false, features = ["alloc"] }
 cfg-if = "1.0"
@@ -40,9 +42,16 @@ ostd-pod = { git = "https://github.com/asterinas/ostd-pod", rev = "c4644be", ver
 spin = "0.9.4"
 smallvec = "1.13.2"
 static_assertions = "1.1.0"
-unwinding = { version = "0.2.3", default-features = false, features = ["fde-gnu-eh-frame-hdr", "hide-trace", "panic", "personality", "unwinder"] }
+unwinding = { version = "0.2.3", default-features = false, features = [
+    "fde-gnu-eh-frame-hdr",
+    "hide-trace",
+    "panic",
+    "personality",
+    "unwinder",
+] }
 volatile = { version = "0.4.5", features = ["unstable"] }
 xarray = { git = "https://github.com/asterinas/xarray", version = "0.1.0" }
+minicov = { path = "../../minicov/minicov" }
 
 [target.x86_64-unknown-none.dependencies]
 x86_64 = "0.14.2"
