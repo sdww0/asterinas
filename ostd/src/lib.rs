@@ -125,24 +125,22 @@ pub fn output_file() {
         CONSOLE_COM2_PORT.send(*i);
     }
 
-    loop{
+    loop {
         let mut res = vec![];
 
         unsafe {
-            if minicov::capture_coverage(&mut res).is_err(){
+            if minicov::capture_coverage(&mut res).is_err() {
                 break;
             }
             minicov::reset_coverage();
         }
-    
+
         early_println!("Result length:{}", res.len());
-    
+
         for i in res {
             CONSOLE_COM2_PORT.send(i);
         }
     }
-
-
 }
 
 /// Indicates whether the kernel is in bootstrap context.

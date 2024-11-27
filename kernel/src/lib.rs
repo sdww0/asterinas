@@ -164,7 +164,7 @@ fn init_thread() {
         QemuExitCode::Failed
     };
     ostd::output_file();
-    loop{}
+    loop {}
     exit_qemu(exit_code);
 }
 
