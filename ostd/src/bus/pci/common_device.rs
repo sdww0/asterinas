@@ -80,6 +80,9 @@ impl PciCommonDevice {
             bar_manager,
             capabilities,
         };
+        device.set_command(
+            device.command() | Command::IO_SPACE | Command::MEMORY_SPACE | Command::BUS_MASTER,
+        );
         device.capabilities = Capability::device_capabilities(&mut device);
         Some(device)
     }

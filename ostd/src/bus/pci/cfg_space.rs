@@ -9,7 +9,7 @@ use core::mem::size_of;
 
 use bitflags::bitflags;
 
-use super::PciDeviceLocation;
+use super::{PciDeviceId, PciDeviceLocation};
 use crate::{
     arch::device::io_port::{PortRead, PortWrite},
     io_mem::IoMem,
@@ -255,6 +255,39 @@ impl MemoryBar {
                 return Err(Error::InvalidArgs);
             }
         };
+
+        // FIXME: This is only used for course development and should never merged into main stream.
+        let base = if base == 0 {
+            const IVSHMEM_VENDOR_ID: u16 = 0x1af4;
+            const IVSHMEM_DEVICE_ID: u16 = 0x1110;
+            const FIXED_IVSHMEM_BASE64: u64 = 0x800_0000_0000;
+            const FIXED_IVSHMEM_BASE32: u32 = 0x40000000;
+
+            let device_id = PciDeviceId::new(*location);
+            if device_id.vendor_id == IVSHMEM_VENDOR_ID && device_id.device_id == IVSHMEM_DEVICE_ID
+            {
+                address_length = AddrLen::Bits32;
+                match address_length {
+                    AddrLen::Bits32 => {
+                        location.write32(offset, 0b1000 | FIXED_IVSHMEM_BASE32);
+                        FIXED_IVSHMEM_BASE32 as u64
+                    }
+                    AddrLen::Bits64 => {
+                        location.write32(
+                            offset,
+                            (0b1100) | (FIXED_IVSHMEM_BASE64 & 0xFFFF_FFFF) as u32,
+                        );
+                        location.write32(offset + 4, (FIXED_IVSHMEM_BASE64 >> 32) as u32);
+                        FIXED_IVSHMEM_BASE64
+                    }
+                }
+            } else {
+                0
+            }
+        } else {
+            base
+        };
+
         // length
         let size = (!(len_encoded & !0xF)).wrapping_add(1);
         let prefetchable = raw & 0b1000 != 0;
