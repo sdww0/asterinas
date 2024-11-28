@@ -177,14 +177,16 @@ impl PageTableEntryTrait for PageTableEntry {
                 PageTableFlags::GLOBAL
             );
 
-        match prop.cache {
-            CachePolicy::Writeback => (),
-            CachePolicy::Uncacheable => {
-                // Currently, Asterinas uses `Uncacheable` for I/O memory.
-                flags |= PageTableFlags::PBMT_IO.bits()
-            }
-            _ => panic!("unsupported cache policy"),
-        }
+        // Well, since we don't enable the extension right now, I comment out the code.
+
+        // match prop.cache {
+        //     CachePolicy::Writeback => (),
+        //     CachePolicy::Uncacheable => {
+        //         // Currently, Asterinas uses `Uncacheable` for I/O memory.
+        //         flags |= PageTableFlags::PBMT_IO.bits()
+        //     }
+        //     _ => panic!("unsupported cache policy"),
+        // }
 
         self.0 = (self.0 & Self::PHYS_ADDR_MASK) | flags;
     }

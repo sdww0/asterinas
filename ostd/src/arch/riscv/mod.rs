@@ -45,6 +45,7 @@ pub(crate) fn init_on_bsp() {
 
     device::init();
     timer::init();
+    pci::init();
 }
 
 pub(crate) unsafe fn init_on_ap() {

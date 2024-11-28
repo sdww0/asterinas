@@ -6,6 +6,7 @@ use core::ops::{Deref, Range};
 
 use align_ext::AlignExt;
 use cfg_if::cfg_if;
+use log::info;
 
 use crate::{
     mm::{
@@ -67,6 +68,11 @@ impl IoMem {
 
         // SAFETY: The caller of `IoMem::new()` and the constructor of `new_kvirt_area` has ensured the
         // safety of this mapping.
+        info!(
+            "Mapping kvirt_area: {:x?}, pa: {:x?}",
+            new_kvirt_area.range(),
+            first_page_start..last_page_end
+        );
         unsafe {
             new_kvirt_area.map_untracked_pages(
                 new_kvirt_area.range(),
