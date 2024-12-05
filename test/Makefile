@@ -27,7 +27,10 @@ INITRAMFS_ALL_DIRS := \
 	$(INITRAMFS)/bin \
 	$(INITRAMFS)/sbin \
 	$(INITRAMFS)/usr/bin \
+	$(INITRAMFS)/python-test \
+	$(INITRAMFS)/usr/lib/python3.10 \
 	$(INITRAMFS)/usr/local \
+	$(INITRAMFS)/usr/local/lib/python3.10/dist-packages \
 	$(INITRAMFS)/test \
 	$(INITRAMFS)/benchmark \
 	$(INITRAMFS_EMPTY_DIRS)
@@ -35,6 +38,51 @@ SYSCALL_TEST_DIR := $(INITRAMFS)/opt/syscall_test
 
 .PHONY: all
 all: build
+
+$(INITRAMFS)/python-test:
+	@mkdir -p $@
+	@cp -r ./python/* $@
+
+$(INITRAMFS)/lib/python3.10:
+	@mkdir -p $@
+	@cp -r /lib/python3.10/* $@
+
+$(INITRAMFS)/lib/python3:
+	@mkdir -p $@
+	@cp -r /lib/python3/* $@
+
+$(INITRAMFS)/usr/lib/python3:
+	@mkdir -p $@
+	@cp -r /usr/lib/python3/* $@
+
+$(INITRAMFS)/usr/lib/python3.10:
+	@mkdir -p $@
+	@cp -r /usr/lib/python3.10/* $@
+
+$(INITRAMFS)/usr/local/lib/python3.10/dist-packages:
+	@mkdir -p $@
+	@# In dist-packages
+	@cp -r /usr/lib/python3/dist-packages/PIL $@
+	@# In site-packages
+	@cp -r ~/.local/lib/python3.10/site-packages/sympy $@
+	@cp -r ~/.local/lib/python3.10/site-packages/sympy-1.13.1.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/filelock $@
+	@cp -r ~/.local/lib/python3.10/site-packages/filelock-3.16.1.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/mpmath $@
+	@cp -r ~/.local/lib/python3.10/site-packages/mpmath-1.3.0.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/fsspec $@
+	@cp -r ~/.local/lib/python3.10/site-packages/fsspec-2024.10.0.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/torch $@
+	@cp -r ~/.local/lib/python3.10/site-packages/torch-2.5.1+cpu.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/torchgen $@
+	@cp -r ~/.local/lib/python3.10/site-packages/torchvision $@
+	@cp -r ~/.local/lib/python3.10/site-packages/torchvision-0.20.1+cpu.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/torchvision.libs $@
+	@cp ~/.local/lib/python3.10/site-packages/typing_extensions.py $@
+	@cp -r ~/.local/lib/python3.10/site-packages/typing_extensions-4.12.2.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/numpy $@
+	@cp -r ~/.local/lib/python3.10/site-packages/numpy-2.0.1.dist-info $@
+	@cp -r ~/.local/lib/python3.10/site-packages/numpy.libs $@
 
 $(INITRAMFS)/lib/x86_64-linux-gnu: | $(VDSO_LIB)
 	@mkdir -p $@
@@ -61,6 +109,28 @@ $(INITRAMFS)/lib/x86_64-linux-gnu: | $(VDSO_LIB)
 	@cp -L /lib/x86_64-linux-gnu/libresolv.so.2 $@
 	@# required for LevelDB-db_bench_sqlite3
 	@cp -L /lib/x86_64-linux-gnu/libsqlite3.so $@
+	@# required for python and torch
+	@cp -L /lib/x86_64-linux-gnu/libexpat.so.1 $@
+	@cp -L /lib/x86_64-linux-gnu/libc.so.6 $@
+	@cp -L /lib/x86_64-linux-gnu/libffi.so.8 $@
+	@cp -L /lib/x86_64-linux-gnu/librt.so.1 $@
+	@cp -L /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2  $@
+	@cp -L /lib/x86_64-linux-gnu/libbz2.so.1.0 $@
+	@cp -L /lib/x86_64-linux-gnu/liblzma.so.5 $@
+	@# required for python image library (PIL)
+	@cp -L /lib/x86_64-linux-gnu/libjpeg.so.8 $@
+	@cp -L /lib/x86_64-linux-gnu/libopenjp2.so.7 $@
+	@cp -L /lib/x86_64-linux-gnu/libimagequant.so.0 $@
+	@cp -L /lib/x86_64-linux-gnu/libtiff.so.5 $@
+	@cp -L /lib/x86_64-linux-gnu/libxcb.so.1 $@
+	@cp -L /lib/x86_64-linux-gnu/libwebp.so.7 $@
+	@cp -L /lib/x86_64-linux-gnu/libzstd.so.1 $@
+	@cp -L /lib/x86_64-linux-gnu/libjbig.so.0 $@
+	@cp -L /lib/x86_64-linux-gnu/libdeflate.so.0 $@
+	@cp -L /lib/x86_64-linux-gnu/libXau.so.6 $@
+	@cp -L /lib/x86_64-linux-gnu/libXdmcp.so.6 $@
+	@cp -L /lib/x86_64-linux-gnu/libbsd.so.0 $@
+	@cp -L /lib/x86_64-linux-gnu/libmd.so.0 $@
 	@# required for VDSO
 	@cp -L $(VDSO_LIB) $@
 
@@ -87,6 +157,19 @@ $(INITRAMFS)/etc:
 $(INITRAMFS)/bin:
 	@mkdir -p $@
 	@/bin/busybox --install -s $@
+	@cp /bin/python $@
+	@cp /bin/python3 $@
+	@cp /bin/python3.10 $@
+	@cp /bin/py3clean $@
+	@cp /bin/py3compile $@
+	@cp /bin/py3versions $@
+	@cp /bin/pydoc3 $@
+	@cp /bin/pydoc3.10 $@
+	@cp /bin/pygettext3 $@
+	@cp /bin/pygettext3.10 $@
+	@cp /bin/pip $@
+	@cp /bin/pip3 $@
+	@cp /bin/pip3.10 $@
 
 $(INITRAMFS)/sbin:
 	@mkdir -p $@
