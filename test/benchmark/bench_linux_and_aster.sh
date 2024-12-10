@@ -64,7 +64,7 @@ run_benchmark() {
         aster_scheme_cmd="SCHEME=${aster_scheme}"
     fi
     local asterinas_cmd="make run BENCHMARK=${benchmark} ${aster_scheme_cmd} ENABLE_KVM=1 RELEASE_LTO=1 NETDEV=tap VHOST=on 2>&1"
-    local linux_cmd="/usr/local/qemu/bin/qemu-system-x86_64 \
+    local linux_cmd="sudo /usr/local/qemu/bin/qemu-system-x86_64 \
         --no-reboot \
         -smp 1 \
         -m 8G \
@@ -83,7 +83,7 @@ run_benchmark() {
     case "${benchmark_type}" in
         "guest_only")
             echo "Running benchmark ${benchmark} on Asterinas..."
-            eval "$asterinas_cmd" | tee ${aster_output}
+            # eval "$asterinas_cmd" | tee ${aster_output}
             prepare_fs
             echo "Running benchmark ${benchmark} on Linux..."
             eval "$linux_cmd" | tee ${linux_output}
