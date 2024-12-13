@@ -29,6 +29,8 @@
 #![feature(trait_upcasting)]
 #![register_tool(component_access_control)]
 
+use core::sync::atomic::Ordering;
+
 use ostd::{
     arch::qemu::{exit_qemu, QemuExitCode},
     boot,
