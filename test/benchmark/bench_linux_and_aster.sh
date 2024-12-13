@@ -85,7 +85,7 @@ run_benchmark() {
     fi
 
     # Prepare commands for Asterinas and Linux
-    local asterinas_cmd="make run BENCHMARK=${benchmark} ${aster_scheme_cmd} ENABLE_KVM=1 RELEASE_LTO=1 NETDEV=tap VHOST=on 2>&1"
+    local asterinas_cmd="make run BENCHMARK=${benchmark} ${aster_scheme_cmd} ENABLE_KVM=1 RELEASE_LTO=1 NETDEV=tap VHOST=on SCHEME=iommu 2>&1"
     local linux_cmd="/usr/local/qemu/bin/qemu-system-x86_64 \
         --no-reboot \
         -smp 1 \
