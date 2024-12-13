@@ -30,6 +30,8 @@
 #![register_tool(component_access_control)]
 
 use kcmdline::KCmdlineArg;
+use core::sync::atomic::Ordering;
+
 use ostd::{
     arch::qemu::{exit_qemu, QemuExitCode},
     boot::boot_info,

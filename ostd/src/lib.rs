@@ -108,7 +108,7 @@ unsafe fn init() {
 }
 
 /// Indicates whether the kernel is in bootstrap context.
-pub(crate) static IN_BOOTSTRAP_CONTEXT: AtomicBool = AtomicBool::new(true);
+pub static IN_BOOTSTRAP_CONTEXT: AtomicBool = AtomicBool::new(true);
 
 /// Invoke the initialization functions defined in the FFI.
 /// The component system uses this function to call the initialization functions of
