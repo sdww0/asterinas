@@ -11,6 +11,8 @@
 
 use core::{ops::Range, sync::atomic::Ordering};
 
+use spin::once::Once;
+
 use crate::{
     arch::mm::{
         current_page_table_paddr, tlb_flush_all_excluding_global, PageTableEntry, PagingConsts,
@@ -29,6 +31,36 @@ use crate::{
     task::{disable_preempt, DisabledPreemptGuard},
     Error,
 };
+
+/// Creating CursorMut after calling `activate`. This structure is useful to avoid using spinlock before using the mutex. (See)
+pub struct CursorMutOnActivate<'a> {
+    range: Range<usize>,
+    cursor: Once<CursorMut<'a, 'a>>,
+    vm_space: &'a VmSpace,
+}
+
+impl<'a> CursorMutOnActivate<'a> {
+    pub fn new(vm_space: &'a VmSpace, range: Range<usize>) -> Self {
+        Self {
+            range,
+            cursor: Once::new(),
+            vm_space,
+        }
+    }
+
+    pub fn activate(&self) {
+        if self.cursor.is_completed() {
+            return;
+        }
+
+        self.cursor
+            .call_once(|| self.vm_space.cursor_mut(&self.range).unwrap());
+    }
+
+    pub fn inner(&mut self) -> Option<&mut CursorMut<'a, 'a>> {
+        self.cursor.get_mut()
+    }
+}
 
 /// Virtual memory space.
 ///

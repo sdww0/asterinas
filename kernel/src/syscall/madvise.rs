@@ -45,7 +45,10 @@ pub fn sys_madvise(
             warn!("MADV_DONTNEED isn't implemented, do nothing for now.");
         }
         MadviseBehavior::MADV_FREE => madv_free(start, end, ctx)?,
-        _ => todo!(),
+        MadviseBehavior::MADV_HUGEPAGE => {
+            warn!("MADV_HUGEPAGE isn't implemented, do nothing for now.")
+        }
+        madv => todo!("Unimplement madv: {:?}", madv),
     }
     Ok(SyscallReturn::Return(0))
 }

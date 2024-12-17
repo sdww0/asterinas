@@ -8,8 +8,9 @@ use core::{
 
 use align_ext::AlignExt;
 use ostd::mm::{
-    tlb::TlbFlushOp, vm_space::VmItem, CachePolicy, Frame, FrameAllocOptions, PageFlags,
-    PageProperty, VmSpace,
+    tlb::TlbFlushOp,
+    vm_space::{CursorMutOnActivate, VmItem},
+    CachePolicy, Frame, FrameAllocOptions, PageFlags, PageProperty, VmSpace,
 };
 
 use super::interval_set::Interval;
@@ -263,20 +264,23 @@ impl VmMapping {
         );
 
         let vm_perms = self.perms - VmPerms::WRITE;
-        let mut cursor = vm_space.cursor_mut(&(start_addr..end_addr))?;
+        let mut cursor = CursorMutOnActivate::new(vm_space, (start_addr..end_addr));
+
         let operate = move |commit_fn: &mut dyn FnMut() -> Result<Frame>| {
-            if let VmItem::NotMapped { .. } = cursor.query().unwrap() {
+            cursor.activate();
+            let inner_cursor = cursor.inner().unwrap();
+            if let VmItem::NotMapped { .. } = inner_cursor.query().unwrap() {
                 // We regard all the surrounding pages as accessed, no matter
                 // if it is really so. Then the hardware won't bother to update
                 // the accessed bit of the page table on following accesses.
                 let page_flags = PageFlags::from(vm_perms) | PageFlags::ACCESSED;
                 let page_prop = PageProperty::new(page_flags, CachePolicy::Writeback);
                 let frame = commit_fn()?;
-                cursor.map(frame, page_prop);
+                inner_cursor.map(frame, page_prop);
             } else {
-                let next_addr = cursor.virt_addr() + PAGE_SIZE;
+                let next_addr = inner_cursor.virt_addr() + PAGE_SIZE;
                 if next_addr < end_addr {
-                    let _ = cursor.jump(next_addr);
+                    let _ = inner_cursor.jump(next_addr);
                 }
             }
             Ok(())

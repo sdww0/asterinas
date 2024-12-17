@@ -276,7 +276,10 @@ fn handle_user_page_fault(f: &mut TrapFrame, page_fault_addr: u64) {
     if let Some(addr) = ExTable::find_recovery_inst_addr(f.rip) {
         f.rip = addr;
     } else {
-        panic!("Cannot handle user page fault; Trapframe:{:#x?}.", f);
+        panic!(
+            "Cannot handle user page fault; Trapframe:{:#x?}. {:#x?}",
+            f, page_fault_addr
+        );
     }
 }
 

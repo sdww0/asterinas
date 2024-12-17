@@ -86,12 +86,12 @@ run_benchmark() {
 
     # Prepare commands for Asterinas and Linux
     local asterinas_cmd="make run BENCHMARK=${benchmark} ${aster_scheme_cmd} ENABLE_KVM=1 RELEASE_LTO=1 NETDEV=tap VHOST=on 2>&1"
-    local linux_cmd="/usr/local/qemu/bin/qemu-system-x86_64 \
+    local linux_cmd="sudo /usr/local/qemu/bin/qemu-system-x86_64 \
         --no-reboot \
-        -smp 1 \
-        -m 8G \
+        -smp 2 \
+        -m 16G \
         -machine q35,kernel-irqchip=split \
-        -cpu Icelake-Server,-pcid,+x2apic \
+        -cpu host,-pcid,+x2apic \
         --enable-kvm \
         -kernel ${LINUX_KERNEL} \
         -initrd ${BENCHMARK_ROOT}/../build/initramfs.cpio.gz \
@@ -107,7 +107,7 @@ run_benchmark() {
     case "${run_mode}" in
         "guest_only")
             echo "Running benchmark ${benchmark} on Asterinas..."
-            eval "$asterinas_cmd" | tee ${ASTER_OUTPUT}
+            # eval "$asterinas_cmd" | tee ${ASTER_OUTPUT}
             prepare_fs
             echo "Running benchmark ${benchmark} on Linux..."
             eval "$linux_cmd" | tee ${LINUX_OUTPUT}

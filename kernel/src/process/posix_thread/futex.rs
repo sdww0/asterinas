@@ -6,6 +6,7 @@ use intrusive_collections::{intrusive_adapter, LinkedList, LinkedListAtomicLink}
 use ostd::{
     cpu::num_cpus,
     sync::{Waiter, Waker},
+    trap::disable_local,
 };
 use spin::Once;
 
@@ -352,8 +353,11 @@ impl FutexKey {
 
     pub fn load_val(&self, ctx: &Context) -> Result<i32> {
         // FIXME: how to implement a atomic load?
-        warn!("implement an atomic load");
-        ctx.user_space().read_val(self.addr)
+        let disalble_irq = disable_local();
+        // warn!("implement an atomic load");
+        let val = ctx.user_space().read_val(self.addr);
+        drop(disalble_irq);
+        val
     }
 
     pub fn addr(&self) -> Vaddr {

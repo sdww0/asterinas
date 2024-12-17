@@ -13,7 +13,7 @@ use core::{
 
 use bitflags::bitflags;
 use cfg_if::cfg_if;
-use log::debug;
+use log::{debug, trace};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 use spin::Once;
@@ -512,7 +512,7 @@ impl FpuState {
 
         self.is_valid.store(true, Relaxed);
 
-        debug!("Save FPU state");
+        trace!("Save FPU state");
     }
 
     /// Restores CPU's FPU state from this instance.
@@ -533,7 +533,7 @@ impl FpuState {
 
         self.is_valid.store(false, Relaxed);
 
-        debug!("Restore FPU state");
+        trace!("Restore FPU state");
     }
 
     /// Clears the state of the instance.
