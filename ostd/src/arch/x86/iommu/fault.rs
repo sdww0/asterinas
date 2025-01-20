@@ -58,13 +58,16 @@ impl FaultEventRegisters {
         let mut data = Volatile::new(&mut *((base_register_vaddr + 0x3c) as *mut u32));
         let mut address = Volatile::new(&mut *((base_register_vaddr + 0x40) as *mut u32));
         let upper_address = Volatile::new(&mut *((base_register_vaddr + 0x44) as *mut u32));
+
+        // Activate fault handler in advance
         let mut fault_irq = IrqLine::alloc().unwrap();
+        fault_irq.on_active(iommu_page_fault_handler);
 
         // Set page fault interrupt vector and address
         data.write(fault_irq.num() as u32);
         address.write(0xFEE0_0000);
         control.write(0);
-        fault_irq.on_active(iommu_page_fault_handler);
+        
         FaultEventRegisters {
             status,
             control,
