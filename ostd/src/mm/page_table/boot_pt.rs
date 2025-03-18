@@ -143,7 +143,8 @@ impl<E: PageTableEntryTrait, C: PagingConstsTrait> BootPageTable<E, C> {
                 unsafe { pte_ptr.write(E::new_pt(frame * C::BASE_PAGE_SIZE)) };
                 frame
             } else if pte.is_last(level) {
-                panic!("mapping an already mapped huge page in the boot page table");
+                // error!("mapping an already mapped huge page in the boot page table");
+                return;
             } else {
                 pte.paddr() / C::BASE_PAGE_SIZE
             };

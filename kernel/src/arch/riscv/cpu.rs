@@ -40,6 +40,10 @@ impl LinuxAbi for UserContext {
     fn tls_pointer(&self) -> usize {
         self.tp()
     }
+    
+    fn set_syscall_num(&mut self, num: usize) {
+        self.set_a0(num);
+    }
 }
 
 /// General-purpose registers.

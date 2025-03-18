@@ -11,9 +11,7 @@ struct VirtioConsolesPrinter;
 
 impl Write for VirtioConsolesPrinter {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        for (_, device) in aster_console::all_devices() {
-            device.send(s.as_bytes());
-        }
+        ostd::early_print!("{}", s);
         Ok(())
     }
 }

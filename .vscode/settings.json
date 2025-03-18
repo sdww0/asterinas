@@ -1,5 +1,5 @@
 {
-    "rust-analyzer.cargo.target": "x86_64-unknown-none",
+    "rust-analyzer.cargo.target": "riscv64gc-unknown-none-elf",
     "rust-analyzer.check.extraEnv": {
         "RUSTFLAGS": "--check-cfg cfg(ktest) --cfg ktest"
     },
@@ -10,6 +10,8 @@
         "--message-format=json",
         "--manifest-path",
         "kernel/Cargo.toml",
+        "--target",
+        "riscv64gc-unknown-none-elf",
         "--target",
         "x86_64-unknown-none",
         "-Zbuild-std=core,alloc,compiler_builtins",
@@ -29,5 +31,8 @@
         "**/.svn": false,
         "**/CVS": false,
         "**/Thumbs.db": false
+    },
+    "files.associations": {
+        "unistd.h": "c"
     }
 }

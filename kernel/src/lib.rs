@@ -143,6 +143,7 @@ fn init_thread() {
 
     let karg = boot::kernel_cmdline();
 
+    info!("Init process path: {:?}", karg.get_initproc_path());
     let initproc = Process::spawn_user_process(
         karg.get_initproc_path().unwrap(),
         karg.get_initproc_argv().to_vec(),
