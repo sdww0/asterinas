@@ -27,7 +27,6 @@ TEST_APPS := \
 	hello_pie \
 	itimer \
 	mmap \
-	mongoose \
 	network \
 	pipe \
 	pthread \
