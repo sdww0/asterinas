@@ -50,8 +50,10 @@ pub fn create_posix_task_from_executable(
     let fs = ThreadFsInfo::default();
     let (_, elf_load_info) = {
         let fs_resolver = fs.resolver().read();
+        info!("Find fs path for executable: {}", executable_path);
         let fs_path = FsPath::new(AT_FDCWD, executable_path)?;
         let elf_file = fs.resolver().read().lookup(&fs_path)?;
+        info!("Found complete.");
         load_program_to_vm(process_vm, elf_file, argv, envp, &fs_resolver, 1)?
     };
 
