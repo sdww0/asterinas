@@ -49,6 +49,7 @@ $(INITRAMFS)/lib/riscv64-linux-gnu: | $(VDSO_LIB)
 	@cp -L /lib/riscv64-linux-gnu/libgcc_s.so.1 $@
 	@cp -L /lib/riscv64-linux-gnu/libpthread.so.0 $@
 	@cp -L /lib/riscv64-linux-gnu/libresolv.so.2 $@
+	@cp -L /usr/lib/riscv64-linux-gnu/libatomic.so.1 $@
 	@# required for benchmarks
 	@cp -L /lib/riscv64-linux-gnu/libcrypto.so.3 $@
 	@cp -L /lib/riscv64-linux-gnu/libcrypt.so.1 $@
