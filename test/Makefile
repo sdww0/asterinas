@@ -22,6 +22,7 @@ INITRAMFS_EMPTY_DIRS := \
 	$(INITRAMFS)/exfat
 INITRAMFS_ALL_DIRS := \
 	$(INITRAMFS)/etc \
+	$(INITRAMFS)/lib \
 	$(INITRAMFS)/lib/riscv64-linux-gnu \
 	$(INITRAMFS)/lib64 \
 	$(INITRAMFS)/bin \
@@ -36,6 +37,10 @@ SYSCALL_TEST_DIR := $(INITRAMFS)/opt/syscall_test
 .PHONY: all
 all: build
 
+$(INITRAMFS)/lib:
+	@mkdir -p $@
+	@cp -L /lib/ld-linux-riscv64-lp64d.so.1 $@
+
 $(INITRAMFS)/lib/riscv64-linux-gnu: | $(VDSO_LIB)
 	@mkdir -p $@
 	@cp -L /lib/riscv64-linux-gnu/libc.so.6 $@
@@ -43,7 +48,6 @@ $(INITRAMFS)/lib/riscv64-linux-gnu: | $(VDSO_LIB)
 	@cp -L /lib/riscv64-linux-gnu/libm.so.6 $@
 	@cp -L /lib/riscv64-linux-gnu/libgcc_s.so.1 $@
 	@cp -L /lib/riscv64-linux-gnu/libpthread.so.0 $@
-	@cp -L /lib/ld-linux-riscv64-lp64d.so.1 $@
 	@cp -L /lib/riscv64-linux-gnu/libresolv.so.2 $@
 	@# required for benchmarks
 	@cp -L /lib/riscv64-linux-gnu/libcrypto.so.3 $@
