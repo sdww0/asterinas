@@ -24,7 +24,6 @@ set:
     j      1b
 
 memset_exit:
-    csrc   sstatus, t2
     sub    a0, t0, a0
     ret
 

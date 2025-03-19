@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: MPL-2.0
 
 use ostd::cpu::{CpuExceptionInfo, UserContext};
+use riscv::register::scause::Exception;
 
-use crate::process::signal::{sig_num::SigNum, signals::fault::FaultSignal, SignalContext};
+use crate::process::signal::{
+    constants::{ILL_ILLOPC, SIGILL},
+    sig_num::SigNum,
+    signals::fault::FaultSignal,
+    SignalContext,
+};
 
 impl SignalContext for UserContext {
     fn set_arguments(&mut self, sig_num: SigNum, siginfo_addr: usize, ucontext_addr: usize) {
@@ -14,6 +20,23 @@ impl SignalContext for UserContext {
 
 impl From<&CpuExceptionInfo> for FaultSignal {
     fn from(trap_info: &CpuExceptionInfo) -> Self {
-        unimplemented!()
+        log::info!("trap_info: {:?}", trap_info);
+        let (num, code, addr) = match trap_info.code {
+            Exception::InstructionMisaligned => todo!(),
+            Exception::InstructionFault => todo!(),
+            Exception::IllegalInstruction => (SIGILL, ILL_ILLOPC, None),
+            Exception::Breakpoint => todo!(),
+            Exception::LoadMisaligned => todo!(),
+            Exception::LoadFault => todo!(),
+            Exception::StoreMisaligned => todo!(),
+            Exception::StoreFault => todo!(),
+            Exception::UserEnvCall => todo!(),
+            Exception::SupervisorEnvCall => todo!(),
+            Exception::InstructionPageFault => todo!(),
+            Exception::LoadPageFault => todo!(),
+            Exception::StorePageFault => todo!(),
+            Exception::Unknown => todo!(),
+        };
+        FaultSignal::new(num, code, addr)
     }
 }

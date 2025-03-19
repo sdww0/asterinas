@@ -27,7 +27,6 @@ store:
     j      1b
 
 memcpy_exit:
-    csrc   sstatus, t2
     sub    a0, t0, a0
     ret
 

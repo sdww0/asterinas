@@ -6,6 +6,7 @@ use aster_rights::Full;
 use ostd::{cpu::*, mm::VmSpace};
 
 use crate::{
+    current_userspace,
     prelude::*,
     process::signal::signals::fault::FaultSignal,
     vm::{page_fault_handler::PageFaultHandler, perms::VmPerms, vmar::Vmar},
@@ -36,7 +37,30 @@ pub fn handle_exception(ctx: &Context, context: &UserContext) {
         }
     }
 
+    info!("User Context:{:x?}", context);
+    let addr = context.sepc();
+    let task = ostd::task::Task::current().unwrap();
+    let space = CurrentUserSpace::new(&task);
+    let mut bytes = [0u8; 512];
+    space
+        .read_bytes(addr - 256, &mut VmWriter::from(&mut bytes[0..512]))
+        ;
+    println!("bytes:{:x?}", &bytes);
+    println!("bytes ptr: {:p}", bytes.as_ptr());
+
+    drop(space);
+    error!(
+        "Unhandle exception, addr: 0x{:x}, instruction: {:x?}",
+        addr, bytes
+    );
+
+    this_is_handle();
     generate_fault_signal(trap_info, ctx);
+}
+
+#[inline(never)]
+pub fn this_is_handle() {
+    println!("this is handle");
 }
 
 /// Handles the page fault occurs in the input `VmSpace`.

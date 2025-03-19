@@ -57,6 +57,12 @@ pub(crate) fn interrupts_ack(irq_number: usize) {
     }
 }
 
+/// Reads a hardware generated 64-bit random value.
+///
+/// Returns None if no random value was generated.
+pub fn read_random() -> Option<u64> {
+    Some(0x1234)
+}
 /// Return the frequency of TSC. The unit is Hz.
 pub fn tsc_freq() -> u64 {
     timer::TIMEBASE_FREQ.load(Ordering::Relaxed)

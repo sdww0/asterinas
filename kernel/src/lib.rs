@@ -90,7 +90,6 @@ pub fn init() {
     util::random::init();
     driver::init();
     time::init();
-    #[cfg(target_arch = "x86_64")]
     net::init();
     sched::init();
     fs::rootfs::init(boot::initramfs()).unwrap();
@@ -125,7 +124,6 @@ fn init_thread() {
     // Work queue should be initialized before interrupt is enabled,
     // in case any irq handler uses work queue as bottom half
     thread::work_queue::init();
-    #[cfg(target_arch = "x86_64")]
     net::lazy_init();
     fs::lazy_init();
     ipc::init();
@@ -140,6 +138,7 @@ fn init_thread() {
 
     let karg = boot::kernel_cmdline();
 
+    info!("Init process path: {:?}", karg.get_initproc_path());
     let initproc = Process::spawn_user_process(
         karg.get_initproc_path().unwrap(),
         karg.get_initproc_argv().to_vec(),

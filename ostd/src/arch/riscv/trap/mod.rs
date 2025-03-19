@@ -30,6 +30,7 @@ pub fn is_kernel_interrupted() -> bool {
 }
 
 pub fn handle_external_interrupts(f: &TrapFrame) {
+    log::debug!("Handling external interrupts");
     while let Some(irq) = super::device::plic::claim_interrupt() {
         call_irq_callback_functions(f, irq.get() as usize);
     }

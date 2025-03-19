@@ -78,6 +78,11 @@ impl UserContext {
         &self.user_context.general
     }
 
+    /// Returns a reference to the general registers.
+    pub fn sepc(&self) -> usize {
+        self.user_context.sepc
+    }
+
     /// Returns a mutable reference to the general registers
     pub fn general_regs_mut(&mut self) -> &mut RawGeneralRegs {
         &mut self.user_context.general
@@ -122,6 +127,10 @@ impl UserContextApiInternal for UserContext {
         let ret = loop {
             scheduler::might_preempt();
 
+            unsafe{
+                riscv::register::sstatus::clear_sum();
+            }
+
             const FS_MASK: usize = 0b11 << 13;
             self.user_context.sstatus =
                 (self.user_context.sstatus & !FS_MASK) | ((self.fpu_state.fs as usize) << 13);
@@ -157,7 +166,9 @@ impl UserContextApiInternal for UserContext {
                 break ReturnReason::KernelEvent;
             }
         };
-
+        unsafe{
+            riscv::register::sstatus::clear_sum();
+        }
         crate::arch::irq::enable_local();
         ret
     }
