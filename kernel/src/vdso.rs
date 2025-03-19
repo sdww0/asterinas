@@ -223,7 +223,7 @@ impl Vdso {
             vdso_vmo.write_bytes(0x80, vdso_data.as_bytes()).unwrap();
 
             let vdso_lib_vmo = {
-                let vdso_path = FsPath::new(AT_FDCWD, "/lib/x86_64-linux-gnu/vdso64.so").unwrap();
+                let vdso_path = FsPath::new(AT_FDCWD, "/lib/riscv64-linux-gnu/vdso64.so").unwrap();
                 let fs_resolver = FsResolver::new();
                 let vdso_lib = fs_resolver.lookup(&vdso_path).unwrap();
                 vdso_lib.inode().page_cache().unwrap()

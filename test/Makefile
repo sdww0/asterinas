@@ -22,7 +22,8 @@ INITRAMFS_EMPTY_DIRS := \
 	$(INITRAMFS)/exfat
 INITRAMFS_ALL_DIRS := \
 	$(INITRAMFS)/etc \
-	$(INITRAMFS)/lib/x86_64-linux-gnu \
+	$(INITRAMFS)/lib \
+	$(INITRAMFS)/lib/riscv64-linux-gnu \
 	$(INITRAMFS)/lib64 \
 	$(INITRAMFS)/bin \
 	$(INITRAMFS)/sbin \
@@ -36,33 +37,25 @@ SYSCALL_TEST_DIR := $(INITRAMFS)/opt/syscall_test
 .PHONY: all
 all: build
 
-$(INITRAMFS)/lib/x86_64-linux-gnu: | $(VDSO_LIB)
+$(INITRAMFS)/lib:
 	@mkdir -p $@
-	@cp -L /lib/x86_64-linux-gnu/libc.so.6 $@
-	@cp -L /lib/x86_64-linux-gnu/libstdc++.so.6 $@
-	@cp -L /lib/x86_64-linux-gnu/libm.so.6 $@
-	@cp -L /lib/x86_64-linux-gnu/libgcc_s.so.1 $@
-	@cp -L /lib/x86_64-linux-gnu/libpthread.so.0 $@
+	@cp -L /lib/ld-linux-riscv64-lp64d.so.1 $@
+
+$(INITRAMFS)/lib/riscv64-linux-gnu: | $(VDSO_LIB)
+	@mkdir -p $@
+	@cp -L /lib/riscv64-linux-gnu/libc.so.6 $@
+	@cp -L /lib/riscv64-linux-gnu/libstdc++.so.6 $@
+	@cp -L /lib/riscv64-linux-gnu/libm.so.6 $@
+	@cp -L /lib/riscv64-linux-gnu/libgcc_s.so.1 $@
+	@cp -L /lib/riscv64-linux-gnu/libpthread.so.0 $@
+	@cp -L /lib/riscv64-linux-gnu/libresolv.so.2 $@
+	@cp -L /usr/lib/riscv64-linux-gnu/libatomic.so.1 $@
 	@# required for benchmarks
-	@cp -L /lib/x86_64-linux-gnu/libcrypto.so.3 $@
-	@cp -L /lib/x86_64-linux-gnu/libcrypt.so.1 $@
-	@cp -L /lib/x86_64-linux-gnu/libdl.so.2 $@
-	@cp -L /lib/x86_64-linux-gnu/libz.so.1 $@
-	@cp -L /lib/x86_64-linux-gnu/libmvec.so.1 $@
-	@cp -L /usr/local/benchmark/iperf/lib/libiperf.so.0 $@
-	@# required for LMbench-network
-	@cp -L /lib/x86_64-linux-gnu/libtirpc.so.3 $@
-	@cp -L /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 $@
-	@cp -L /lib/x86_64-linux-gnu/libkrb5.so.3 $@
-	@cp -L /lib/x86_64-linux-gnu/libk5crypto.so.3 $@
-	@cp -L /lib/x86_64-linux-gnu/libcom_err.so.2 $@
-	@cp -L /lib/x86_64-linux-gnu/libkrb5support.so.0 $@
-	@cp -L /lib/x86_64-linux-gnu/libkeyutils.so.1 $@
-	@cp -L /lib/x86_64-linux-gnu/libresolv.so.2 $@
-	@# required for LevelDB-db_bench_sqlite3
-	@cp -L /lib/x86_64-linux-gnu/libsqlite3.so $@
-	@# required for memcached
-	@cp -L /lib/x86_64-linux-gnu/libevent-2.1.so.7 $@
+	@cp -L /lib/riscv64-linux-gnu/libcrypto.so.3 $@
+	@cp -L /lib/riscv64-linux-gnu/libcrypt.so.1 $@
+	@cp -L /lib/riscv64-linux-gnu/libdl.so.2 $@
+	@cp -L /lib/riscv64-linux-gnu/libz.so.1 $@
+	# @cp -L /lib/riscv64-linux-gnu/libmvec.so.1 $@
 	@# required for VDSO
 	@cp -L $(VDSO_LIB) $@
 
@@ -79,7 +72,7 @@ $(BINARY_CACHE_DIR)/vdso64.so:
 
 $(INITRAMFS)/lib64:
 	@mkdir -p $@
-	@cp -L /lib64/ld-linux-x86-64.so.2 $@
+	# @cp -L /lib64/ld-linux-x86-64.so.2 $@
 
 $(INITRAMFS)/etc:
 	@mkdir -p $@
@@ -101,9 +94,7 @@ $(INITRAMFS)/usr/bin: | $(INITRAMFS)/bin
 
 $(INITRAMFS)/usr/local:
 	@mkdir -p $@
-	@cp -r /usr/local/nginx $@
 	@cp -r /usr/local/redis $@
-	@cp -r /usr/local/memcached $@
 
 .PHONY: $(INITRAMFS)/test
 $(INITRAMFS)/test:
@@ -114,19 +105,7 @@ $(INITRAMFS)/benchmark: | $(INITRAMFS)/benchmark/bin
 
 $(INITRAMFS)/benchmark/bin:
 	@mkdir -p $@
-	@cp /usr/local/benchmark/sysbench/bin/sysbench $@
-	@cp /usr/local/benchmark/iperf/bin/iperf3 $@
-	@cp /usr/local/benchmark/membench/membench $@
-	@cp /usr/local/benchmark/iozone $@
-	@cp -r /usr/local/benchmark/unixbench $@
-	@cp -r /usr/local/benchmark/lmbench $@
-	@cp /usr/local/benchmark/fio/bin/fio $@
 	@cp /usr/local/benchmark/sqlite-speedtest1 $@
-	@cp /usr/local/leveldb/benchmark/db_bench $@
-	@mv $@/db_bench $@/db_bench_leveldb
-	@cp /usr/local/leveldb/benchmark/db_bench_sqlite3 $@
-	@cp /usr/local/benchmark/hackbench $@
-	@cp /usr/local/benchmark/schbench $@
 
 # Make necessary directories.
 $(INITRAMFS_EMPTY_DIRS):

@@ -4,6 +4,7 @@ use core::num::NonZeroU16;
 
 use bit_field::BitField;
 use fdt::{node::FdtNode, Fdt};
+use log::debug;
 use riscv::register::scause::Interrupt;
 use spin::Once;
 
@@ -55,6 +56,7 @@ pub fn claim_interrupt() -> Option<NonZeroU16> {
 }
 
 pub fn complete_interrupt(id: u16) {
+    debug!("Complete interrupt: {}",id);
     let io_mem = PLIC_IOMEM.get().unwrap();
     let irq_guard = trap::disable_local();
 
@@ -81,6 +83,7 @@ pub fn enable_external_interrupt(id: u16) {
 pub(super) fn init() {
     let fdt = DEVICE_TREE.get().unwrap();
     let plic = fdt.find_node("/soc/plic").unwrap();
+    debug!("plic node: {:x?}", plic);
     let region = plic.reg().unwrap().next().unwrap();
     PLIC_IOMEM.call_once(|| unsafe {
         super::create_device_io_mem(region.starting_address, region.size.unwrap())
@@ -116,7 +119,7 @@ pub(super) fn init() {
         }
 
         let hartid = cpu.property("reg").unwrap().as_usize().unwrap();
-        log::debug!("Register PLIC context {context_id} on CPU {hartid}, with interrupt {cause}");
+        log::debug!("Register PLIC context {context_id} on CPU {hartid}, with interrupt {cause}, hart_base: {:x}",CONTEXT_BASE + CONTEXT_PER_HART * context_id);
 
         let handler = PLIC_HANDLER.get_on_cpu(hartid.try_into().unwrap());
         handler.call_once(|| PlicHandler {

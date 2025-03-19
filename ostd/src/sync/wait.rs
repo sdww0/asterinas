@@ -40,6 +40,7 @@ use crate::task::{scheduler, Task};
 /// Multiple threads may be the waiters of a wait queue.
 /// Other threads may invoke the `wake`-family methods of a wait queue to
 /// wake up one or many waiting threads.
+#[repr(align(64))]
 pub struct WaitQueue {
     // A copy of `wakers.len()`, used for the lock-free fast path in `wake_one` and `wake_all`.
     num_wakers: AtomicU32,

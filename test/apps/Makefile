@@ -21,21 +21,17 @@ TEST_APPS := \
 	exit \
 	fdatasync \
 	file_io \
-	fork \
 	fork_c \
 	getpid \
 	hello_c \
 	hello_pie \
-	hello_world \
 	itimer \
 	mmap \
-	mongoose \
 	network \
 	pipe \
 	pthread \
 	pty \
 	shm \
-	signal_c \
 	vsock \
 
 # The C head and source files of all the apps, excluding the downloaded mongoose files

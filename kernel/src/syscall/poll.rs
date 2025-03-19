@@ -1,14 +1,90 @@
 // SPDX-License-Identifier: MPL-2.0
 
-use core::{cell::Cell, time::Duration};
+use core::{cell::Cell, sync::atomic::Ordering, time::Duration};
 
 use super::SyscallReturn;
 use crate::{
     events::IoEvents,
     fs::{file_handle::FileLike, file_table::FileDesc},
     prelude::*,
-    process::signal::Poller,
+    process::signal::{sig_mask::SigMask, Poller},
+    time::timespec_t,
 };
+
+pub fn sys_ppoll(
+    fds: Vaddr,
+    nfds: u64,
+    timespec_addr: Vaddr,
+    sigmask_addr: Vaddr,
+    value: usize,
+    ctx: &Context,
+) -> Result<SyscallReturn> {
+    let user_space = ctx.user_space();
+
+    let old_simask = if sigmask_addr != 0 {
+        let sigmask_with_size: SigMaskWithSize = user_space.read_val(sigmask_addr)?;
+
+        if !sigmask_with_size.is_valid() {
+            return_errno_with_message!(Errno::EINVAL, "sigmask size is invalid")
+        }
+        let old_sigmask = ctx
+            .posix_thread
+            .sig_mask()
+            .swap(sigmask_with_size.sigmask, Ordering::Relaxed);
+
+        Some(old_sigmask)
+    } else {
+        None
+    };
+
+    let poll_fds = {
+        let mut read_addr = fds;
+        let mut poll_fds = Vec::with_capacity(nfds as _);
+
+        for _ in 0..nfds {
+            let c_poll_fd = user_space.read_val::<c_pollfd>(read_addr)?;
+            read_addr += core::mem::size_of::<c_pollfd>();
+
+            let poll_fd = PollFd::from(c_poll_fd);
+            // Always clear the revents fields first
+            poll_fd.revents().set(IoEvents::empty());
+            poll_fds.push(poll_fd);
+        }
+
+        poll_fds
+    };
+
+    let timeout = if timespec_addr != 0 {
+        let time_spec: timespec_t = user_space.read_val(timespec_addr)?;
+        Some(Duration::try_from(time_spec)?)
+    } else {
+        None
+    };
+
+    debug!(
+        "ppoll_fds = {:?}, nfds = {}, timeout = {:?}",
+        poll_fds, nfds, timeout
+    );
+
+    let num_revents = do_poll(&poll_fds, timeout.as_ref(), ctx)?;
+
+    // Write back
+    let mut write_addr = fds;
+    for pollfd in poll_fds {
+        let c_poll_fd = c_pollfd::from(pollfd);
+
+        user_space.write_val(write_addr, &c_poll_fd)?;
+        write_addr += core::mem::size_of::<c_pollfd>();
+    }
+
+    if let Some(old_mask) = old_simask {
+        ctx.posix_thread
+            .sig_mask()
+            .store(old_mask, Ordering::Relaxed);
+    }
+
+    Ok(SyscallReturn::Return(num_revents as _))
+}
 
 pub fn sys_poll(fds: Vaddr, nfds: u64, timeout: i32, ctx: &Context) -> Result<SyscallReturn> {
     let user_space = ctx.user_space();
@@ -90,6 +166,19 @@ pub fn do_poll(poll_fds: &[PollFd], timeout: Option<&Duration>, ctx: &Context) -
         }
 
         // FIXME: We need to update `timeout` since we have waited for some time.
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Pod)]
+struct SigMaskWithSize {
+    sigmask: SigMask,
+    sigmasksize: usize,
+}
+
+impl SigMaskWithSize {
+    const fn is_valid(&self) -> bool {
+        self.sigmask.is_empty() || self.sigmasksize == size_of::<SigMask>()
     }
 }
 

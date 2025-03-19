@@ -63,6 +63,7 @@ use crate::syscall::{
     nanosleep::{sys_clock_nanosleep, sys_nanosleep},
     open::sys_openat,
     pipe::sys_pipe2,
+    poll::sys_ppoll,
     prctl::sys_prctl,
     pread64::sys_pread64,
     preadv::{sys_preadv, sys_preadv2, sys_readv},
@@ -172,6 +173,7 @@ impl_syscall_nums_and_dispatch_fn! {
     SYS_PWRITEV = 70             => sys_pwritev(args[..4]);
     SYS_SENDFILE64 = 71          => sys_sendfile(args[..4]);
     SYS_PSELECT6 = 72            => sys_pselect6(args[..6]);
+    SYS_PPOLL= 73                 => sys_ppoll(args[..5]);
     SYS_READLINKAT = 78          => sys_readlinkat(args[..4]);
     SYS_NEWFSTATAT = 79          => sys_fstatat(args[..4]);
     SYS_NEWFSTAT = 80            => sys_fstat(args[..2]);

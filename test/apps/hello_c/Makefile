@@ -3,4 +3,3 @@
 include ../test_common.mk
 
 EXTRA_C_FLAGS := -static
-CC := riscv64-unknown-linux-gnu-gcc

@@ -275,7 +275,7 @@ macro_rules! impl_syscall_nums_and_dispatch_fn {
             match syscall_number {
                 $(
                     $num => {
-                        $crate::log_syscall_entry!($name);
+                        $crate::log_syscall_entry!($name,user_ctx);
                         $crate::syscall::dispatch_fn_inner!(args, ctx, user_ctx, $handler $args)
                     }
                 )*
@@ -343,7 +343,7 @@ pub fn handle_syscall(ctx: &Context, user_ctx: &mut UserContext) {
 
 #[macro_export]
 macro_rules! log_syscall_entry {
-    ($syscall_name: tt) => {
+    ($syscall_name: tt,$context:tt) => {
         if log::log_enabled!(log::Level::Info) {
             let syscall_name_str = stringify!($syscall_name);
             let pid = $crate::current!().pid();
@@ -352,11 +352,12 @@ macro_rules! log_syscall_entry {
                 $crate::current_thread!().as_posix_thread().unwrap().tid()
             };
             log::info!(
-                "[pid={}][tid={}][id={}][{}]",
+                "[pid={}][tid={}][id={}][{}][0x{:x}]",
                 pid,
                 tid,
                 $syscall_name,
-                syscall_name_str
+                syscall_name_str,
+                $context.sepc(),
             );
         }
     };
