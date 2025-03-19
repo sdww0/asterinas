@@ -65,7 +65,7 @@ $(BINARY_CACHE_DIR)/vdso64.so:
 
 $(INITRAMFS)/lib64:
 	@mkdir -p $@
-	@cp -L /lib64/ld-linux-x86-64.so.2 $@
+	# @cp -L /lib64/ld-linux-x86-64.so.2 $@
 
 $(INITRAMFS)/etc:
 	@mkdir -p $@
