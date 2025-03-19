@@ -48,7 +48,7 @@ $(INITRAMFS)/lib/riscv64-linux-gnu: | $(VDSO_LIB)
 	@cp -L /lib/riscv64-linux-gnu/libcrypt.so.1 $@
 	@cp -L /lib/riscv64-linux-gnu/libdl.so.2 $@
 	@cp -L /lib/riscv64-linux-gnu/libz.so.1 $@
-	@cp -L /lib/riscv64-linux-gnu/libmvec.so.1 $@
+	# @cp -L /lib/riscv64-linux-gnu/libmvec.so.1 $@
 	@# required for VDSO
 	@cp -L $(VDSO_LIB) $@
 
