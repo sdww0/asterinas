@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
-MAKEFLAGS += --no-builtin-rules # Prevent the implicit rules from compiling ".c" or ".s" files automatically.
+# Prevent the implicit rules from compiling ".c" or ".s" files automatically.
+MAKEFLAGS += --no-builtin-rules
 
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MKFILE_PATH)))
@@ -17,22 +18,20 @@ TEST_APPS := \
 	epoll \
 	eventfd2 \
 	execve \
+	exit \
 	fdatasync \
 	file_io \
-	fork \
 	fork_c \
 	getpid \
 	hello_c \
 	hello_pie \
-	hello_world \
 	itimer \
 	mmap \
-	mongoose \
 	network \
 	pipe \
 	pthread \
 	pty \
-	signal_c \
+	shm \
 	vsock \
 
 # The C head and source files of all the apps, excluding the downloaded mongoose files
