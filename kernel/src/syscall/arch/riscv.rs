@@ -112,6 +112,7 @@ use crate::syscall::{
     statfs::{sys_fstatfs, sys_statfs},
     symlink::sys_symlinkat,
     sync::sys_sync,
+    sysinfo::sys_sysinfo,
     tgkill::sys_tgkill,
     timer_create::{sys_timer_create, sys_timer_delete},
     timer_settime::{sys_timer_gettime, sys_timer_settime},
@@ -235,6 +236,7 @@ impl_syscall_nums_and_dispatch_fn! {
     SYS_GETGID = 176             => sys_getgid(args[..0]);
     SYS_GETEGID = 177            => sys_getegid(args[..0]);
     SYS_GETTID = 178             => sys_gettid(args[..0]);
+    SYS_SYSINFO = 179            => sys_sysinfo(args[..1]);
     SYS_SEMGET = 190             => sys_semget(args[..3]);
     SYS_SEMCTL = 191             => sys_semctl(args[..4]);
     SYS_SEMOP = 193              => sys_semop(args[..3]);
@@ -268,7 +270,7 @@ impl_syscall_nums_and_dispatch_fn! {
     SYS_EXECVEAT = 281           => sys_execveat(args[..5], &mut user_ctx);
     SYS_PREADV2 = 286            => sys_preadv2(args[..5]);
     SYS_PWRITEV2 = 287           => sys_pwritev2(args[..5]);
-    SYS_CLOCK_GETTIME = 403      => sys_clock_gettime(args[..2]);
+    SYS_CLOCK_GETTIME = 113      => sys_clock_gettime(args[..2]);
     SYS_CLOCK_NANOSLEEP = 407    => sys_clock_nanosleep(args[..4]);
     SYS_TIMER_GETTIME = 408      => sys_timer_gettime(args[..2]);
     SYS_TIMER_SETTIME = 409      => sys_timer_settime(args[..4]);

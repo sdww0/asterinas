@@ -297,10 +297,14 @@ impl FpuState {
         self.floating_state.restore();
 
         // TODO: uncomment this line to reduce context-swap overhead once `&mut self` is allowed
+        as_mutable(self).fs = sstatus::FS::Clean;
         // self.fs = sstatus::FS::Clean;
 
         log::trace!("FPU state restored");
     }
+}
+fn as_mutable<T: ?Sized>(val: &T) -> &mut T {
+    unsafe { (val as *const T as *mut T).as_mut().unwrap_unchecked() }
 }
 
 impl Default for FpuState {

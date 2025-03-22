@@ -606,6 +606,8 @@ impl<R1, R2> VmarMapOptions<R1, R2> {
             free_region.start
         };
 
+        trace!("map_to_addr = 0x{:x}", map_to_addr);
+
         // Build the mapping.
         let vmo = vmo.map(|vmo| MappedVmo::new(vmo.to_dyn(), vmo_offset..vmo_limit));
         let vm_mapping = VmMapping::new(

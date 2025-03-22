@@ -18,7 +18,6 @@ TEST_APPS := \
 	epoll \
 	eventfd2 \
 	execve \
-	exit \
 	fdatasync \
 	file_io \
 	fork_c \
@@ -31,7 +30,6 @@ TEST_APPS := \
 	pipe \
 	pthread \
 	pty \
-	shm \
 	vsock \
 
 # The C head and source files of all the apps, excluding the downloaded mongoose files

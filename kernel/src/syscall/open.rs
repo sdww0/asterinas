@@ -46,6 +46,7 @@ pub fn sys_openat(
             };
         file_table.insert(file_handle, fd_flags)
     };
+    debug!("sys openat return fd = {}", fd);
     Ok(SyscallReturn::Return(fd as _))
 }
 

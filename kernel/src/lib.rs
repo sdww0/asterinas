@@ -90,7 +90,7 @@ pub fn init() {
     util::random::init();
     driver::init();
     time::init();
-    net::init();
+    // net::init();
     sched::init();
     fs::rootfs::init(boot::initramfs()).unwrap();
     device::init().unwrap();
@@ -124,7 +124,7 @@ fn init_thread() {
     // Work queue should be initialized before interrupt is enabled,
     // in case any irq handler uses work queue as bottom half
     thread::work_queue::init();
-    net::lazy_init();
+    // net::lazy_init();
     fs::lazy_init();
     ipc::init();
     // driver::pci::virtio::block::block_device_test();

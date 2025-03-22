@@ -454,6 +454,7 @@ dependencies = [
  "core2",
  "int-to-c-enum",
  "lending-iterator",
+ "log",
 ]
 
 [[package]]
