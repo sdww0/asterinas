@@ -15,9 +15,6 @@ mod node;
 use node::*;
 pub mod cursor;
 pub use cursor::{Cursor, CursorMut, PageTableItem};
-#[cfg(ktest)]
-mod test;
-
 pub(crate) mod boot_pt;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -229,17 +226,6 @@ where
         Ok(())
     }
 
-    /// Query about the mapping of a single byte at the given virtual address.
-    ///
-    /// Note that this function may fail reflect an accurate result if there are
-    /// cursors concurrently accessing the same virtual address range, just like what
-    /// happens for the hardware MMU walk.
-    #[cfg(ktest)]
-    pub fn query(&self, vaddr: Vaddr) -> Option<(Paddr, PageProperty)> {
-        // SAFETY: The root node is a valid page table node so the address is valid.
-        unsafe { page_walk::<E, C>(self.root_paddr(), vaddr) }
-    }
-
     /// Create a new cursor exclusively accessing the virtual address range for mapping.
     ///
     /// If another cursor is already accessing the range, the new cursor may wait until the
@@ -268,70 +254,6 @@ where
             root: self.root.clone_shallow(),
             _phantom: PhantomData,
         }
-    }
-}
-
-/// A software emulation of the MMU address translation process.
-/// It returns the physical address of the given virtual address and the mapping info
-/// if a valid mapping exists for the given virtual address.
-///
-/// # Safety
-///
-/// The caller must ensure that the root_paddr is a valid pointer to the root
-/// page table node.
-///
-/// # Notes on the page table free-reuse-then-read problem
-///
-/// Because neither the hardware MMU nor the software page walk method
-/// would get the locks of the page table while reading, they can enter
-/// a to-be-recycled page table node and read the page table entries
-/// after the node is recycled and reused.
-///
-/// To mitigate this problem, the page table nodes are by default not
-/// actively recycled, until we find an appropriate solution.
-#[cfg(ktest)]
-pub(super) unsafe fn page_walk<E: PageTableEntryTrait, C: PagingConstsTrait>(
-    root_paddr: Paddr,
-    vaddr: Vaddr,
-) -> Option<(Paddr, PageProperty)> {
-    use super::paddr_to_vaddr;
-
-    let _guard = crate::trap::disable_local();
-
-    let mut cur_level = C::NR_LEVELS;
-    let mut cur_pte = {
-        let node_addr = paddr_to_vaddr(root_paddr);
-        let offset = pte_index::<C>(vaddr, cur_level);
-        // SAFETY: The offset does not exceed the value of PAGE_SIZE.
-        unsafe { (node_addr as *const E).add(offset).read() }
-    };
-
-    while cur_level > 1 {
-        if !cur_pte.is_present() {
-            return None;
-        }
-
-        if cur_pte.is_last(cur_level) {
-            debug_assert!(cur_level <= C::HIGHEST_TRANSLATION_LEVEL);
-            break;
-        }
-
-        cur_level -= 1;
-        cur_pte = {
-            let node_addr = paddr_to_vaddr(cur_pte.paddr());
-            let offset = pte_index::<C>(vaddr, cur_level);
-            // SAFETY: The offset does not exceed the value of PAGE_SIZE.
-            unsafe { (node_addr as *const E).add(offset).read() }
-        };
-    }
-
-    if cur_pte.is_present() {
-        Some((
-            cur_pte.paddr() + (vaddr & (page_size::<C>(cur_level) - 1)),
-            cur_pte.prop(),
-        ))
-    } else {
-        None
     }
 }
 

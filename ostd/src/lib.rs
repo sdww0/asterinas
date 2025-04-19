@@ -125,39 +125,3 @@ fn invoke_ffi_init_funcs() {
         }
     }
 }
-
-/// Simple unit tests for the ktest framework.
-#[cfg(ktest)]
-mod test {
-    use crate::prelude::*;
-
-    #[ktest]
-    #[allow(clippy::eq_op)]
-    fn trivial_assertion() {
-        assert_eq!(0, 0);
-    }
-
-    #[ktest]
-    #[should_panic]
-    fn failing_assertion() {
-        assert_eq!(0, 1);
-    }
-
-    #[ktest]
-    #[should_panic(expected = "expected panic message")]
-    fn expect_panic() {
-        panic!("expected panic message");
-    }
-}
-
-#[doc(hidden)]
-pub mod ktest {
-    //! The module re-exports everything from the [`ostd_test`] crate, as well
-    //! as the test entry point macro.
-    //!
-    //! It is rather discouraged to use the definitions here directly. The
-    //! `ktest` attribute is sufficient for all normal use cases.
-
-    pub use ostd_macros::{test_main as main, test_panic_handler as panic_handler};
-    pub use ostd_test::*;
-}

@@ -352,32 +352,3 @@ pub trait TaskContextApi {
     /// Gets stack pointer
     fn stack_pointer(&self) -> usize;
 }
-
-#[cfg(ktest)]
-mod test {
-    use crate::prelude::*;
-
-    #[ktest]
-    fn create_task() {
-        #[allow(clippy::eq_op)]
-        let task = || {
-            assert_eq!(1, 1);
-        };
-        let task = Arc::new(
-            crate::task::TaskOptions::new(task)
-                .data(())
-                .build()
-                .unwrap(),
-        );
-        task.run();
-    }
-
-    #[ktest]
-    fn spawn_task() {
-        #[allow(clippy::eq_op)]
-        let task = || {
-            assert_eq!(1, 1);
-        };
-        let _ = crate::task::TaskOptions::new(task).data(()).spawn();
-    }
-}
