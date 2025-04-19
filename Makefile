@@ -60,6 +60,8 @@ else ifeq ($(AUTO_TEST), test)
 CARGO_OSDK_ARGS += --init-args="/test/run_general_test.sh"
 else ifeq ($(AUTO_TEST), boot)
 CARGO_OSDK_ARGS += --init-args="/test/boot_hello.sh"
+else ifeq ($(AUTO_TEST), sqlite)
+CARGO_OSDK_ARGS += --init-args="/etc/sqlite.sh"
 else ifeq ($(AUTO_TEST), vsock)
 export VSOCK=on
 CARGO_OSDK_ARGS += --init-args="/test/run_vsock_test.sh"

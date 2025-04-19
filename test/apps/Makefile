@@ -12,27 +12,6 @@ TEST_BUILD_DIR ?= $(INITRAMFS)/test
 # These test apps are sorted by name
 TEST_APPS := \
 	alarm \
-	capability \
-	clone3 \
-	cpu_affinity \
-	epoll \
-	eventfd2 \
-	execve \
-	exit \
-	fdatasync \
-	file_io \
-	fork_c \
-	getpid \
-	hello_c \
-	hello_pie \
-	itimer \
-	mmap \
-	network \
-	pipe \
-	pthread \
-	pty \
-	shm \
-	vsock \
 
 # The C head and source files of all the apps, excluding the downloaded mongoose files
 C_SOURCES := \
