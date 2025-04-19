@@ -18,11 +18,6 @@ pub mod trap;
 
 use core::sync::atomic::Ordering;
 
-#[cfg(feature = "cvm_guest")]
-pub(crate) fn init_cvm_guest() {
-    // Unimplemented, no-op
-}
-
 pub(crate) fn init_on_bsp() {
     // SAFETY: this function is only called once on BSP.
     unsafe {

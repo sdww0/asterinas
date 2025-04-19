@@ -72,17 +72,6 @@ impl DmaStream {
         start_paddr.checked_add(frame_count * PAGE_SIZE).unwrap();
         let start_daddr = match dma_type() {
             DmaType::Direct => {
-                #[cfg(all(target_arch = "x86_64", feature = "cvm_guest"))]
-                // SAFETY:
-                // This is safe because we are ensuring that the physical address range specified by `start_paddr` and `frame_count` is valid before these operations.
-                // The `check_and_insert_dma_mapping` function checks if the physical address range is already mapped.
-                // We are also ensuring that we are only modifying the page table entries corresponding to the physical address range specified by `start_paddr` and `frame_count`.
-                // Therefore, we are not causing any undefined behavior or violating any of the requirements of the 'unprotect_gpa_range' function.
-                if tdx_is_enabled() {
-                    unsafe {
-                        tdx_guest::unprotect_gpa_range(start_paddr, frame_count).unwrap();
-                    }
-                }
                 start_paddr as Daddr
             }
             DmaType::Iommu => {
@@ -144,32 +133,7 @@ impl DmaStream {
     /// [`read_bytes`]: Self::read_bytes
     /// [`write_bytes`]: Self::write_bytes
     pub fn sync(&self, _byte_range: Range<usize>) -> Result<(), Error> {
-        cfg_if::cfg_if! {
-            if #[cfg(target_arch = "x86_64")]{
-                // The streaming DMA mapping in x86_64 is cache coherent, and does not require synchronization.
-                // Reference: <https://lwn.net/Articles/855328/>, <https://lwn.net/Articles/2265/>
-                Ok(())
-            } else {
-                if _byte_range.end > self.nbytes() {
-                    return Err(Error::InvalidArgs);
-                }
-                if self.inner.is_cache_coherent {
-                    return Ok(());
-                }
-                let start_va = crate::mm::paddr_to_vaddr(self.inner.segment.start_paddr()) as *const u8;
-                // TODO: Query the CPU for the cache line size via CPUID, we use 64 bytes as the cache line size here.
-                for i in _byte_range.step_by(64) {
-                    // TODO: Call the cache line flush command in the corresponding architecture.
-                    #[cfg(target_arch="riscv64")]
-                    {
-                        log::trace!("Cache line flush in RISC-V is not supported for now.");
-                        return Ok(());
-                    }
-                    todo!()
-                }
-                Ok(())
-            }
-        }
+        Ok(())
     }
 }
 
@@ -186,19 +150,7 @@ impl Drop for DmaStreamInner {
         // Ensure that the addresses used later will not overflow
         start_paddr.checked_add(frame_count * PAGE_SIZE).unwrap();
         match dma_type() {
-            DmaType::Direct => {
-                #[cfg(all(target_arch = "x86_64", feature = "cvm_guest"))]
-                // SAFETY:
-                // This is safe because we are ensuring that the physical address range specified by `start_paddr` and `frame_count` is valid before these operations.
-                // The `start_paddr()` ensures the `start_paddr` is page-aligned.
-                // We are also ensuring that we are only modifying the page table entries corresponding to the physical address range specified by `start_paddr` and `frame_count`.
-                // Therefore, we are not causing any undefined behavior or violating any of the requirements of the `protect_gpa_range` function.
-                if tdx_is_enabled() {
-                    unsafe {
-                        tdx_guest::protect_gpa_range(start_paddr, frame_count).unwrap();
-                    }
-                }
-            }
+            DmaType::Direct => {}
             DmaType::Iommu => {
                 for i in 0..frame_count {
                     let paddr = start_paddr + (i * PAGE_SIZE);

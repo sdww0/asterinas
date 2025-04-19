@@ -25,7 +25,6 @@ pub static MMIO_BUS: SpinLock<MmioBus> = SpinLock::new(MmioBus::new());
 static IRQS: SpinLock<Vec<IrqLine>> = SpinLock::new(Vec::new());
 
 pub(crate) fn init() {
-
     #[cfg(target_arch = "riscv64")]
     riscv64_mmio_probe();
 }

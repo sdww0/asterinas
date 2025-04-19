@@ -72,9 +72,6 @@ unsafe fn init() {
     arch::enable_cpu_features();
     arch::serial::init();
 
-    #[cfg(feature = "cvm_guest")]
-    arch::init_cvm_guest();
-
     // SAFETY: This function is called only once and only on the BSP.
     unsafe { cpu::local::early_init_bsp_local_base() };
 
