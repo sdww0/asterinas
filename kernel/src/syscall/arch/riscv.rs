@@ -191,6 +191,8 @@ impl_syscall_nums_and_dispatch_fn! {
     SYS_SETITIMER = 103          => sys_setitimer(args[..3]);
     SYS_TIMER_CREATE = 107       => sys_timer_create(args[..3]);
     SYS_TIMER_DELETE = 111       => sys_timer_delete(args[..1]);
+    SYS_CLOCK_GETTIME = 113      => sys_clock_gettime(args[..2]);
+    SYS_CLOCK_NANOSLEEP = 115    => sys_clock_nanosleep(args[..4]);
     SYS_SCHED_SETAFFINITY = 122  => sys_sched_setaffinity(args[..3]);
     SYS_SCHED_GETAFFINITY = 123  => sys_sched_getaffinity(args[..3]);
     SYS_SCHED_YIELD = 124        => sys_sched_yield(args[..0]);
