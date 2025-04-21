@@ -329,6 +329,7 @@ pub fn handle_syscall(ctx: &Context, user_ctx: &mut UserContext) {
 
     match syscall_return {
         Ok(return_value) => {
+            debug!("syscall return with value: {:?}", return_value);
             if let SyscallReturn::Return(return_value) = return_value {
                 user_ctx.set_syscall_ret(return_value as usize);
             }

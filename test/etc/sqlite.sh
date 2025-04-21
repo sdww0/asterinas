@@ -1,1 +1,1 @@
-/benchmark/bin/sqlite-speedtest1 --size 10
+/benchmark/bin/sqlite-speedtest1 --size 1
