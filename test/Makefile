@@ -94,7 +94,6 @@ $(INITRAMFS)/usr/bin: | $(INITRAMFS)/bin
 
 $(INITRAMFS)/usr/local:
 	@mkdir -p $@
-	@cp -r /usr/local/redis $@
 
 .PHONY: $(INITRAMFS)/test
 $(INITRAMFS)/test:
