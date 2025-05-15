@@ -14,6 +14,10 @@ pub fn sys_write(
         fd, user_buf_ptr, user_buf_len
     );
 
+    if fd == 2 {
+        return Ok(SyscallReturn::Return(user_buf_len as _));
+    }
+
     let file = {
         let file_table = ctx.posix_thread.file_table().lock();
         file_table.get_file(fd)?.clone()

@@ -19,7 +19,7 @@ use crate::{
 ///
 /// For system performance reasons, this rate cannot be set too high, otherwise most of the time
 /// is spent executing timer code.
-pub const TIMER_FREQ: u64 = 1000;
+pub const TIMER_FREQ: u64 = 1;
 
 pub(crate) static TIMEBASE_FREQ: AtomicU64 = AtomicU64::new(1);
 static TIMER_STEP: AtomicU64 = AtomicU64::new(1);
