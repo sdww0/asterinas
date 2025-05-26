@@ -41,11 +41,7 @@ pub fn sys_rt_sigreturn(ctx: &Context, user_ctx: &mut UserContext) -> Result<Sys
     } else {
         thread_local.sig_context().set(Some(ucontext.uc_link));
     };
-    ucontext
-        .uc_mcontext
-        .inner
-        .gp_regs
-        .copy_to_raw(user_ctx.general_regs_mut());
+    ucontext.uc_mcontext.inner.gp_regs.copy_to_raw(user_ctx);
 
     // unblock sig mask
     let sig_mask = ucontext.uc_sigmask;

@@ -4,6 +4,7 @@ use alloc::string::String;
 
 use ostd::{
     cpu::{CpuExceptionInfo, RawGeneralRegs, UserContext},
+    user::UserContextApi,
     Pod,
 };
 
@@ -82,6 +83,7 @@ pub struct GpRegs {
     pub t4: usize,
     pub t5: usize,
     pub t6: usize,
+    pub ip: usize,
 }
 
 macro_rules! copy_gp_regs {
@@ -122,12 +124,16 @@ macro_rules! copy_gp_regs {
 }
 
 impl GpRegs {
-    pub fn copy_to_raw(&self, dst: &mut RawGeneralRegs) {
-        copy_gp_regs!(self, dst);
+    pub fn copy_to_raw(&self, dst: &mut UserContext) {
+        let regs = dst.general_regs_mut();
+        copy_gp_regs!(self, regs);
+        dst.set_instruction_pointer(self.ip);
     }
 
-    pub fn copy_from_raw(&mut self, src: &RawGeneralRegs) {
-        copy_gp_regs!(src, self);
+    pub fn copy_from_raw(&mut self, dst: &UserContext) {
+        let regs = dst.general_regs();
+        copy_gp_regs!(regs, self);
+        self.ip = dst.instruction_pointer();
     }
 }
 

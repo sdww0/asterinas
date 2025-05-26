@@ -168,7 +168,7 @@ impl InitStack {
             vmo_options.alloc()?
         };
         let vmar_map_options = {
-            let perms = VmPerms::READ | VmPerms::WRITE;
+            let perms = VmPerms::READ | VmPerms::WRITE | VmPerms::EXEC;
             let map_addr = self.initial_top - self.max_size;
             debug_assert!(map_addr % PAGE_SIZE == 0);
             root_vmar

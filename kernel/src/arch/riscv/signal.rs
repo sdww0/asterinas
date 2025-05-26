@@ -14,6 +14,7 @@ impl SignalContext for UserContext {
 
 impl From<&CpuExceptionInfo> for FaultSignal {
     fn from(trap_info: &CpuExceptionInfo) -> Self {
+        todo!("Trap info: {:x?}", trap_info);
         unimplemented!()
     }
 }

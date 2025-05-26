@@ -190,11 +190,7 @@ pub fn handle_user_signal(
         uc_sigmask: mask.into(),
         ..Default::default()
     };
-    ucontext
-        .uc_mcontext
-        .inner
-        .gp_regs
-        .copy_from_raw(user_ctx.general_regs());
+    ucontext.uc_mcontext.inner.gp_regs.copy_from_raw(user_ctx);
     let sig_context = ctx.thread_local.sig_context().get();
     if let Some(sig_context_addr) = sig_context {
         ucontext.uc_link = sig_context_addr;
@@ -218,15 +214,26 @@ pub fn handle_user_signal(
     } else {
         // Otherwise we create a trampoline.
         // FIXME: This may cause problems if we read old_context from rsp.
+        #[cfg(target_arch = "x86_64")]
         const TRAMPOLINE: &[u8] = &[
             0xb8, 0x0f, 0x00, 0x00, 0x00, // mov eax, 15(syscall number of rt_sigreturn)
             0x0f, 0x05, // syscall (call rt_sigreturn)
             0x90, // nop (for alignment)
         ];
+        #[cfg(target_arch = "riscv64")]
+        const TRAMPOLINE: &[u8] = &[
+            0x93, 0x08, 0xb0, 0x08, // li a7, 139
+            0x73, 0x00, 0x00, 0x00, // ecall
+        ];
         stack_pointer -= TRAMPOLINE.len() as u64;
         let trampoline_rip = stack_pointer;
         user_space.write_bytes(stack_pointer as Vaddr, &mut VmReader::from(TRAMPOLINE))?;
-        stack_pointer = write_u64_to_user_stack(stack_pointer, trampoline_rip)?;
+        #[cfg(target_arch = "riscv64")]
+        user_ctx.set_ra(trampoline_rip as usize);
+        #[cfg(target_arch = "x86_64")]
+        {
+            stack_pointer = write_u64_to_user_stack(stack_pointer, trampoline_rip)?;
+        }
     }
 
     // 4. Set correct register values

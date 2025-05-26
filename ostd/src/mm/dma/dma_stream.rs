@@ -71,9 +71,7 @@ impl DmaStream {
         // Ensure that the addresses used later will not overflow
         start_paddr.checked_add(frame_count * PAGE_SIZE).unwrap();
         let start_daddr = match dma_type() {
-            DmaType::Direct => {
-                start_paddr as Daddr
-            }
+            DmaType::Direct => start_paddr as Daddr,
             DmaType::Iommu => {
                 for i in 0..frame_count {
                     let paddr = start_paddr + (i * PAGE_SIZE);
