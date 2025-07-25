@@ -78,7 +78,7 @@ CARGO_OSDK_COMMON_ARGS += --profile release-lto
 OSTD_TASK_STACK_SIZE_IN_PAGES = 8
 else ifeq ($(RELEASE), 1)
 CARGO_OSDK_COMMON_ARGS += --release
-OSTD_TASK_STACK_SIZE_IN_PAGES = 8
+OSTD_TASK_STACK_SIZE_IN_PAGES = 4
 endif
 
 # If the BENCHMARK is set, we will run the benchmark in the kernel mode.

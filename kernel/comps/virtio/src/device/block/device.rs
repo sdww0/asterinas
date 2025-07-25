@@ -50,7 +50,7 @@ impl BlockDevice {
             // FIXME: legacy device do not support `GetId` request.
             "legacy_blk".to_string()
         } else {
-            device.request_device_id()
+            "legacy_blk".to_string()
         };
 
         let block_device = Arc::new(Self {

@@ -273,10 +273,15 @@ fn primary_fault_handler(fault_event_regs: &mut FaultEventRegisters) {
         }
 
         // Report
-        error!(
-            "Catch iommu page fault, doing nothing. recording:{:x?}",
-            recording
+        crate::early_println!(
+            "[Kernel error] Catch iommu page fault, doing nothing. Fault address: 0x{:x?}000",
+            recording.fault_info(),
         );
+
+        // panic!(
+        //     "[Kernel error] Catch iommu page fault, panic recording:{:x?}",
+        //     recording
+        // );
 
         // Clear Fault field
         recording.clear_fault();

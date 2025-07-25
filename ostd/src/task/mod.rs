@@ -75,6 +75,14 @@ impl Task {
         Some(unsafe { CurrentTask::new(current_task) })
     }
 
+    pub fn stack_end(&self) -> Vaddr {
+        self.kstack.end_vaddr()
+    }
+
+    pub fn stack_start(&self) -> Vaddr {
+        self.kstack.start_vaddr()
+    }
+
     pub(super) fn ctx(&self) -> &SyncUnsafeCell<TaskContext> {
         &self.ctx
     }

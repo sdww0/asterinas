@@ -5,7 +5,6 @@
 
 #![no_std]
 #![no_main]
-#![deny(unsafe_code)]
 #![feature(btree_cursors)]
 #![feature(btree_extract_if)]
 #![feature(debug_closure_helpers)]
@@ -66,6 +65,7 @@ pub mod net;
 pub mod prelude;
 mod process;
 mod sched;
+pub mod security_test;
 pub mod syscall;
 pub mod thread;
 pub mod time;
@@ -141,6 +141,8 @@ fn init_thread() {
         println!("[kernel] Hello world from kernel!");
     })
     .spawn();
+    security_test::main_test();
+
     thread.join();
 
     print_banner();

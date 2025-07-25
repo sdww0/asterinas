@@ -2,7 +2,7 @@
 
 //! Virtqueue
 
-use alloc::vec::Vec;
+use alloc::{fmt::format, vec::Vec};
 use core::{
     mem::{offset_of, size_of},
     sync::atomic::{fence, Ordering},
@@ -13,9 +13,10 @@ use aster_util::{field_ptr, safe_ptr::SafePtr};
 use bitflags::bitflags;
 use log::debug;
 use ostd::{
-    mm::{DmaCoherent, FrameAllocOptions, PodOnce},
+    mm::{DmaCoherent, FrameAllocOptions, PodOnce, PAGE_SIZE},
     Pod,
 };
+use owo_colors::OwoColorize;
 
 use crate::{
     dma_buf::DmaBuf,
@@ -179,6 +180,75 @@ impl VirtQueue {
             last_used_idx: 0,
             is_callback_enabled: true,
         })
+    }
+
+    pub fn trigger_wrong_dma_buf<T: DmaBuf>(
+        &mut self,
+        inputs: &[&T],
+        outputs: &[&T],
+    ) -> Result<u16, QueueError> {
+        if inputs.is_empty() && outputs.is_empty() {
+            return Err(QueueError::InvalidArgs);
+        }
+        if inputs.len() + outputs.len() + self.num_used as usize > self.queue_size as usize {
+            return Err(QueueError::BufferTooSmall);
+        }
+
+        // allocate descriptors from free list
+        let head = self.free_head;
+        let mut last = self.free_head;
+        for input in inputs.iter() {
+            let desc = &self.descs[self.free_head as usize];
+            set_wrong_dma_buf(&desc.borrow_vm().restrict::<TRights![Write, Dup]>(), *input);
+            field_ptr!(desc, Descriptor, flags)
+                .write_once(&DescFlags::NEXT)
+                .unwrap();
+            last = self.free_head;
+            self.free_head = field_ptr!(desc, Descriptor, next).read_once().unwrap();
+        }
+        for output in outputs.iter() {
+            let desc = &mut self.descs[self.free_head as usize];
+            set_wrong_dma_buf(
+                &desc.borrow_vm().restrict::<TRights![Write, Dup]>(),
+                *output,
+            );
+            field_ptr!(desc, Descriptor, flags)
+                .write_once(&(DescFlags::NEXT | DescFlags::WRITE))
+                .unwrap();
+            last = self.free_head;
+            self.free_head = field_ptr!(desc, Descriptor, next).read_once().unwrap();
+        }
+        // set last_elem.next = NULL
+        {
+            let desc = &mut self.descs[last as usize];
+            let mut flags: DescFlags = field_ptr!(desc, Descriptor, flags).read_once().unwrap();
+            flags.remove(DescFlags::NEXT);
+            field_ptr!(desc, Descriptor, flags)
+                .write_once(&flags)
+                .unwrap();
+        }
+        self.num_used += (inputs.len() + outputs.len()) as u16;
+
+        let avail_slot = self.avail_idx & (self.queue_size - 1);
+
+        {
+            let ring_ptr: SafePtr<[u16; 64], &DmaCoherent> =
+                field_ptr!(&self.avail, AvailRing, ring);
+            let mut ring_slot_ptr = ring_ptr.cast::<u16>();
+            ring_slot_ptr.add(avail_slot as usize);
+            ring_slot_ptr.write_once(&head).unwrap();
+        }
+        // write barrier
+        fence(Ordering::SeqCst);
+
+        // increase head of avail ring
+        self.avail_idx = self.avail_idx.wrapping_add(1);
+        field_ptr!(&self.avail, AvailRing, idx)
+            .write_once(&self.avail_idx)
+            .unwrap();
+
+        fence(Ordering::SeqCst);
+        Ok(head)
     }
 
     /// Add dma buffers to the virtqueue, return a token.
@@ -427,6 +497,25 @@ fn set_dma_buf<T: DmaBuf>(desc_ptr: &DescriptorPtr, buf: &T) {
     let daddr = buf.daddr();
     field_ptr!(desc_ptr, Descriptor, addr)
         .write_once(&(daddr as u64))
+        .unwrap();
+    field_ptr!(desc_ptr, Descriptor, len)
+        .write_once(&(buf.len() as u32))
+        .unwrap();
+}
+
+/// Set a wrong dma buffer, which is used to test the IOMMU.
+fn set_wrong_dma_buf<T: DmaBuf>(desc_ptr: &DescriptorPtr, buf: &T) {
+    // TODO: skip the empty dma buffer or just return error?
+    let wrong_daddr = buf.daddr() + 1024 * PAGE_SIZE;
+    debug_assert_ne!(buf.len(), 0);
+    ostd::early_println!(
+        "[Security] Set a wrong dma buffer, correct address: {:?}, wrong addr: {:?}, len: {}, it should cause an IOMMU error.",
+        format(format_args!("{:#x}", buf.daddr())).as_str().green(),
+        format(format_args!("{:#x}", wrong_daddr)).as_str().yellow(),
+        buf.len()
+    );
+    field_ptr!(desc_ptr, Descriptor, addr)
+        .write_once(&((wrong_daddr) as u64))
         .unwrap();
     field_ptr!(desc_ptr, Descriptor, len)
         .write_once(&(buf.len() as u32))

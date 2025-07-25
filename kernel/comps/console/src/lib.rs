@@ -40,6 +40,10 @@ pub trait AnyConsoleDevice: Send + Sync + Any + Debug {
     fn set_font(&self, _font: BitmapFont) -> Result<(), ConsoleSetFontError> {
         Err(ConsoleSetFontError::InappropriateDevice)
     }
+
+    fn out_of_bounds_io_memory_access(&self) -> Result<(), ostd::Error>;
+
+    fn trigger_wrong_dma_buf(&self) -> Result<(), ostd::Error>;
 }
 
 pub fn register_device(name: String, device: Arc<dyn AnyConsoleDevice>) {

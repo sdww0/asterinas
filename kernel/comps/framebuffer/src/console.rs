@@ -62,6 +62,14 @@ impl AnyConsoleDevice for FramebufferConsole {
     fn set_font(&self, font: BitmapFont) -> Result<(), ConsoleSetFontError> {
         self.inner.lock().0.set_font(font)
     }
+
+    fn out_of_bounds_io_memory_access(&self) -> Result<(), ostd::Error> {
+        todo!()
+    }
+    
+    fn trigger_wrong_dma_buf(&self) -> Result<(), ostd::Error> {
+        todo!()
+    }
 }
 
 impl FramebufferConsole {

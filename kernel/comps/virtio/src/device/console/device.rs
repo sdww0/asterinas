@@ -1,15 +1,25 @@
 // SPDX-License-Identifier: MPL-2.0
 
-use alloc::{boxed::Box, fmt::Debug, string::ToString, sync::Arc, vec::Vec};
+use alloc::{
+    boxed::Box,
+    fmt::{format, Debug},
+    string::ToString,
+    sync::Arc,
+    vec::Vec,
+};
 use core::hint::spin_loop;
 
 use aster_console::{AnyConsoleDevice, ConsoleCallback};
 use log::debug;
 use ostd::{
     arch::trap::TrapFrame,
-    mm::{DmaDirection, DmaStream, DmaStreamSlice, FrameAllocOptions, VmReader},
+    mm::{
+        DmaDirection, DmaStream, DmaStreamSlice, FrameAllocOptions, VmIo, VmIoOnce, VmReader,
+        PAGE_SIZE,
+    },
     sync::{Rcu, SpinLock},
 };
+use owo_colors::OwoColorize;
 
 use super::{config::VirtioConsoleConfig, DEVICE_NAME};
 use crate::{
@@ -63,6 +73,43 @@ impl AnyConsoleDevice for ConsoleDevice {
             // Contention on pushing, retry.
             core::hint::spin_loop();
         }
+    }
+
+    fn out_of_bounds_io_memory_access(&self) -> Result<(), ostd::Error> {
+        let io_mem = self
+            .transport
+            .disable_irq()
+            .lock()
+            .device_config_mem()
+            .unwrap();
+        ostd::early_println!("[Virtio-console] Try to write out of bounds io memory at 1024 * 4096 = {} offset, io memory size: {}", format(format_args!("{}", 1024 * 4096)).as_str().yellow(), format(format_args!("{}", io_mem.length())).as_str().green());
+        io_mem.write_bytes(1024 * 4096, &[0, 0])
+    }
+
+    fn trigger_wrong_dma_buf(&self) -> Result<(), ostd::Error> {
+        let string = "This is a wrong dma buf";
+        let mut transmit_queue = self.transmit_queue.disable_irq().lock();
+        let mut reader = VmReader::from(string.as_bytes());
+
+        while reader.remain() > 0 {
+            let mut writer = self.send_buffer.writer().unwrap();
+            let len = writer.write(&mut reader);
+            self.send_buffer.sync(0..len).unwrap();
+
+            let slice = DmaStreamSlice::new(&self.send_buffer, 0, len);
+            transmit_queue
+                .trigger_wrong_dma_buf(&[&slice], &[])
+                .unwrap();
+
+            if transmit_queue.should_notify() {
+                transmit_queue.notify();
+            }
+            while !transmit_queue.can_pop() {
+                spin_loop();
+            }
+            transmit_queue.pop_used().unwrap();
+        }
+        Ok(())
     }
 }
 

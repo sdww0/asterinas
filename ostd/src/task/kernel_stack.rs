@@ -36,6 +36,7 @@ pub static KERNEL_STACK_SIZE: usize = STACK_SIZE_IN_PAGES as usize * PAGE_SIZE;
 pub struct KernelStack {
     kvirt_area: KVirtArea,
     tlb_coherent: AtomicCpuSet,
+    start_vaddr: Vaddr,
     end_vaddr: Vaddr,
     has_guard_page: bool,
 }
@@ -56,7 +57,7 @@ impl KernelStack {
     // be improved by caching/reusing kernel stacks with a pool.
     pub fn new_with_guard_page() -> Result<Self> {
         let pages = FrameAllocOptions::new()
-            .zeroed(false)
+            .zeroed(true)
             .alloc_segment_with(KERNEL_STACK_SIZE / PAGE_SIZE, |_| KernelStackMeta)?;
         let prop = PageProperty {
             flags: PageFlags::RW,
@@ -64,16 +65,50 @@ impl KernelStack {
             priv_flags: PrivilegedPageFlags::empty(),
         };
         let new_kvirt_area = KVirtArea::map_frames(
-            KERNEL_STACK_SIZE + 4 * PAGE_SIZE,
+            KERNEL_STACK_SIZE + 2 * PAGE_SIZE,
             2 * PAGE_SIZE,
             pages.into_iter(),
             prop,
         );
         let mapped_start = new_kvirt_area.range().start + 2 * PAGE_SIZE;
         let mapped_end = mapped_start + KERNEL_STACK_SIZE;
+        crate::early_println!(
+            "[kernel] Kernel stack is at {:#x}..{:#x}, size: {} bytes.",
+            mapped_start,
+            mapped_end,
+            KERNEL_STACK_SIZE
+        );
         Ok(Self {
             kvirt_area: new_kvirt_area,
             tlb_coherent: AtomicCpuSet::new(CpuSet::new_empty()),
+            start_vaddr: mapped_start,
+            end_vaddr: mapped_end,
+            has_guard_page: true,
+        })
+    }
+
+    pub fn new_without_guard_page() -> Result<Self> {
+        let pages = FrameAllocOptions::new()
+            .zeroed(true)
+            .alloc_segment_with(KERNEL_STACK_SIZE / PAGE_SIZE, |_| KernelStackMeta)?;
+        let prop = PageProperty {
+            flags: PageFlags::RW,
+            cache: CachePolicy::Writeback,
+            priv_flags: PrivilegedPageFlags::empty(),
+        };
+        let new_kvirt_area = KVirtArea::map_frames(KERNEL_STACK_SIZE, 0, pages.into_iter(), prop);
+        let mapped_start = new_kvirt_area.range().start;
+        let mapped_end = mapped_start + KERNEL_STACK_SIZE;
+        crate::early_println!(
+            "[kernel] Kernel stack is at {:#x}..{:#x}, size: {} bytes.",
+            mapped_start,
+            mapped_end,
+            KERNEL_STACK_SIZE
+        );
+        Ok(Self {
+            kvirt_area: new_kvirt_area,
+            tlb_coherent: AtomicCpuSet::new(CpuSet::new_empty()),
+            start_vaddr: mapped_start,
             end_vaddr: mapped_end,
             has_guard_page: true,
         })
@@ -86,6 +121,10 @@ impl KernelStack {
             tlb_flush_addr_range(&self.kvirt_area.range());
             self.tlb_coherent.add(cur_cpu, Ordering::Relaxed);
         }
+    }
+
+    pub fn start_vaddr(&self) -> Vaddr {
+        self.start_vaddr
     }
 
     pub fn end_vaddr(&self) -> Vaddr {
