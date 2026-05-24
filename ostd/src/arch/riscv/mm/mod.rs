@@ -239,7 +239,11 @@ impl PageTableEntry {
     }
 
     fn new_page(paddr: Paddr, _level: PagingLevel, prop: PageProperty) -> Self {
+        // Install RISC-V leaf PTEs with A/D set so mappings work in
+        // environments that trap instead of auto-updating these bits.
         let mut flags = PteFlags::VALID.bits()
+            | PteFlags::ACCESSED.bits()
+            | PteFlags::DIRTY.bits()
             | parse_flags!(prop.flags.bits(), PageFlags::R, PteFlags::READABLE)
             | parse_flags!(prop.flags.bits(), PageFlags::W, PteFlags::WRITABLE)
             | parse_flags!(prop.flags.bits(), PageFlags::X, PteFlags::EXECUTABLE)
