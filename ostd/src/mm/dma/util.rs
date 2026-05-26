@@ -78,6 +78,9 @@ mod allocator {
 static PADDR_REF_CNTS: SpinLock<RangeCounter, LocalIrqDisabled> =
     SpinLock::new(RangeCounter::new());
 
+#[cfg(target_arch = "riscv64")]
+const SBI_ERR_NOT_SUPPORTED: usize = -2isize as usize;
+
 pub(super) fn cvm_need_private_protection() -> bool {
     #[cfg(target_arch = "x86_64")]
     {
@@ -163,7 +166,9 @@ pub(super) unsafe fn prepare_dma(pa_range: &Range<Paddr>) -> Option<Daddr> {
     }
 
     // SAFETY: The safety condition is upheld by the caller.
-    unsafe { dma_remap(pa_range) }
+    let daddr = unsafe { dma_remap(pa_range) };
+    register_zion_shared_dma(pa_range);
+    daddr
 }
 
 /// Unprepares a physical address range from DMA mapping.
@@ -173,6 +178,7 @@ pub(super) unsafe fn prepare_dma(pa_range: &Range<Paddr>) -> Option<Daddr> {
 /// The provided physical address range must be untyped DMA memory that was
 /// previously prepared by an [`alloc_unprotect_physical_range()`] call.
 pub(super) unsafe fn unprepare_dma(pa_range: &Range<Paddr>, daddr: Option<Daddr>) {
+    free_zion_shared_dma(pa_range);
     unmap_dma_remap(daddr.map(|daddr| daddr..daddr + pa_range.len()));
 
     // SAFETY: The safety condition is upheld by the caller.
@@ -180,6 +186,57 @@ pub(super) unsafe fn unprepare_dma(pa_range: &Range<Paddr>, daddr: Option<Daddr>
     unsafe {
         dealloc_protect_physical_range(pa_range);
     }
+}
+
+#[cfg(target_arch = "riscv64")]
+fn register_zion_shared_dma(pa_range: &Range<Paddr>) {
+    let Some((addr, nr_pages)) = zion_shared_dma_args(pa_range) else {
+        return;
+    };
+
+    let err = crate::arch::zion::register_shared_mem(addr, nr_pages);
+    if err != 0 && err != SBI_ERR_NOT_SUPPORTED {
+        crate::warn!(
+            "failed to register Zion shared DMA range: addr={:#x}, pages={}, err={}",
+            addr,
+            nr_pages,
+            err
+        );
+    }
+}
+
+#[cfg(not(target_arch = "riscv64"))]
+fn register_zion_shared_dma(_pa_range: &Range<Paddr>) {}
+
+#[cfg(target_arch = "riscv64")]
+fn free_zion_shared_dma(pa_range: &Range<Paddr>) {
+    let Some((addr, nr_pages)) = zion_shared_dma_args(pa_range) else {
+        return;
+    };
+
+    let err = crate::arch::zion::free_shared_mem(addr, nr_pages);
+    if err != 0 && err != SBI_ERR_NOT_SUPPORTED {
+        crate::warn!(
+            "failed to free Zion shared DMA range: addr={:#x}, pages={}, err={}",
+            addr,
+            nr_pages,
+            err
+        );
+    }
+}
+
+#[cfg(not(target_arch = "riscv64"))]
+fn free_zion_shared_dma(_pa_range: &Range<Paddr>) {}
+
+#[cfg(target_arch = "riscv64")]
+fn zion_shared_dma_args(pa_range: &Range<Paddr>) -> Option<(usize, usize)> {
+    if pa_range.is_empty() {
+        return None;
+    }
+
+    debug_assert!(pa_range.start.is_multiple_of(PAGE_SIZE));
+    debug_assert!(pa_range.end.is_multiple_of(PAGE_SIZE));
+    Some((pa_range.start, pa_range.len() / PAGE_SIZE))
 }
 
 /// Marks a physical address range as used (also unprotected if in TDX guest).
