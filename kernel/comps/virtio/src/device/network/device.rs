@@ -99,11 +99,6 @@ impl NetworkDevice {
             assert_eq!(rx_buffers.put(rx_buffer) as u16, i);
         }
 
-        if recv_queue.should_notify() {
-            debug!("notify receive queue");
-            recv_queue.notify();
-        }
-
         let mut device = Self {
             config_manager,
             caps,
@@ -142,6 +137,11 @@ impl NetworkDevice {
             .register_queue_callback(QUEUE_RECV, Box::new(handle_recv_event), true)?;
 
         device.transport.finish_init();
+
+        if device.recv_queue.should_notify() {
+            debug!("notify receive queue after driver init");
+            device.recv_queue.notify();
+        }
 
         aster_network::register_device(
             super::DEVICE_NAME.to_string(),
