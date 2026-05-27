@@ -7,21 +7,34 @@ use ostd::{arch::cpu::context::UserContext, mm::VmIo};
 use super::SyscallReturn;
 use crate::{
     prelude::*,
-    process::{CloneArgs, CloneFlags, clone_child, signal::sig_num::SigNum},
+    process::{clone_child, signal::sig_num::SigNum, CloneArgs, CloneFlags},
     vm::vmar::is_userspace_vaddr,
 };
 
-// The order of arguments for clone differs in different architecture.
-// This order we use here is the order for x86_64. See https://man7.org/linux/man-pages/man2/clone.2.html.
+// The order of arguments for clone differs in different architectures.
 pub fn sys_clone(
     clone_flags: u64,
     new_sp: u64,
     parent_tidptr: Vaddr,
-    child_tidptr: Vaddr,
-    tls: u64,
+    arg3: Vaddr,
+    arg4: u64,
     ctx: &Context,
     parent_context: &UserContext,
 ) -> Result<SyscallReturn> {
+    let (child_tidptr, tls) = {
+        #[cfg(target_arch = "riscv64")]
+        {
+            // RISC-V raw clone ABI: flags, stack, parent_tid, tls, child_tid.
+            (arg4 as Vaddr, arg3 as u64)
+        }
+
+        #[cfg(not(target_arch = "riscv64"))]
+        {
+            // x86_64 raw clone ABI: flags, stack, parent_tid, child_tid, tls.
+            (arg3, arg4)
+        }
+    };
+
     let args = CloneArgs::for_clone(clone_flags, parent_tidptr, child_tidptr, tls, new_sp)?;
     debug!("clone args = {:x?}", args);
 

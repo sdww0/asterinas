@@ -101,6 +101,13 @@ pub fn read_tsc() -> u64 {
     riscv::register::time::read64()
 }
 
+/// Flushes the local hart's instruction cache.
+pub fn flush_local_instruction_cache() {
+    // SAFETY: `fence.i` is a local ordering/cache-maintenance instruction and
+    // does not access memory through raw pointers.
+    unsafe { core::arch::asm!("fence.i", options(nostack)) };
+}
+
 /// Reads a hardware generated 64-bit random value.
 ///
 /// Returns `None` if no random value was generated.
