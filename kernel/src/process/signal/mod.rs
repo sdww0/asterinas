@@ -181,14 +181,21 @@ pub fn handle_pending_signal(user_ctx: &mut UserContext, ctx: &Context) {
                 do_exit_group(TermStatus::Killed(SIGSEGV), ctx, user_ctx);
             }
         }
-        SigAction::Dfl if ctx.process.is_init_process() => {
-            // From Linux man pages "kill(2)":
-            // "The only signals that can be sent to process ID 1, the init process, are those for
-            // which init has explicitly installed signal handlers."
-        }
         SigAction::Dfl => {
             let sig_default_action = SigDefaultAction::from_signum(sig_num);
             debug!("sig_default_action = {:?}", sig_default_action);
+
+            if ctx.process.is_init_process() && should_init_ignore_default_signal(&*signal) {
+                // From Linux man pages "kill(2)":
+                // "The only signals that can be sent to process ID 1, the init process, are those
+                // for which init has explicitly installed signal handlers."
+                //
+                // This protection applies to user-generated signals. Synchronous fault signals
+                // must still take their default action, otherwise an init process that executes a
+                // trapping instruction can loop forever on the same user PC.
+                debug!("Ignore default signal {:?} for init process", sig_num);
+                return;
+            }
 
             match sig_default_action {
                 SigDefaultAction::Core | SigDefaultAction::Term => {
@@ -261,6 +268,10 @@ fn dequeue_pending_signal(ctx: &Context) -> Option<(DequeuedSignal, SigAction)> 
     Some((signal, sig_action))
 }
 
+fn should_init_ignore_default_signal(signal: &dyn signals::Signal) -> bool {
+    signal.to_info().si_code <= 0
+}
+
 /// Re-queue the ptrace-captured signal.
 ///
 /// This appends to the tail of the origin queue,
@@ -330,17 +341,6 @@ pub fn handle_user_signal(
 
     let user_space = ctx.user_space();
 
-    // 1. Write `siginfo_t`.
-    stack_pointer = alloc_aligned_in_user_stack(
-        stack_pointer,
-        size_of::<siginfo_t>(),
-        align_of::<siginfo_t>(),
-    );
-    user_space.write_val(stack_pointer as _, &sig_info)?;
-    let siginfo_addr = stack_pointer;
-
-    // 2. Write `ucontext_t`.
-
     // Save the current signal stack information.
     let uc_stack = {
         let mut sig_stack = ctx.thread_local.sig_stack().borrow_mut();
@@ -367,14 +367,44 @@ pub fn handle_user_signal(
     let fpu_context_bytes = fpu_context.as_bytes();
     ctx.thread_local.fpu().set_context(FpuContext::new());
 
+    let siginfo_addr: u64;
+    let ucontext_addr: u64;
+
     cfg_if::cfg_if! {
-        if #[cfg(target_arch = "x86_64")] {
+        if #[cfg(target_arch = "riscv64")] {
+            // Match Linux RISC-V: the signal frame is `siginfo_t` followed by
+            // `ucontext_t`, and the FPU state lives inside `uc_mcontext`.
+            ucontext
+                .uc_mcontext
+                .copy_fpu_context_from(fpu_context_bytes);
+
+            stack_pointer = alloc_aligned_in_user_stack(
+                stack_pointer,
+                size_of::<siginfo_t>() + size_of::<ucontext_t>(),
+                16,
+            );
+            siginfo_addr = stack_pointer;
+            ucontext_addr = siginfo_addr + size_of::<siginfo_t>() as u64;
+
+            user_space.write_val(siginfo_addr as _, &sig_info)?;
+            user_space.write_val(ucontext_addr as _, &ucontext)?;
+        } else if #[cfg(target_arch = "x86_64")] {
+            // 1. Write `siginfo_t`.
+            stack_pointer = alloc_aligned_in_user_stack(
+                stack_pointer,
+                size_of::<siginfo_t>(),
+                align_of::<siginfo_t>(),
+            );
+            user_space.write_val(stack_pointer as _, &sig_info)?;
+            siginfo_addr = stack_pointer;
+
+            // 2. Write `ucontext_t`.
             // Align the FPU context address to the 64-byte boundary so that the
             // user program can use the XSAVE/XRSTOR instructions at that address,
             // if necessary.
             let fpu_context_addr =
                 alloc_aligned_in_user_stack(stack_pointer, fpu_context_bytes.len(), 64);
-            let ucontext_addr = alloc_aligned_in_user_stack(
+            ucontext_addr = alloc_aligned_in_user_stack(
                 fpu_context_addr,
                 size_of::<ucontext_t>(),
                 align_of::<ucontext_t>(),
@@ -385,23 +415,27 @@ pub fn handle_user_signal(
 
             const UC_FP_XSTATE: u64 = 1 << 0;
             ucontext.uc_flags = UC_FP_XSTATE;
-        } else if #[cfg(target_arch = "riscv64")] {
-            // Reference:
-            // <https://elixir.bootlin.com/linux/v6.17.5/source/arch/riscv/include/uapi/asm/ptrace.h#L94-L98>,
-            // <https://elixir.bootlin.com/linux/v6.17.5/source/arch/riscv/include/uapi/asm/ptrace.h#L69-L77>.
-            const FP_STATE_SIZE: usize =
-                size_of::<ostd::arch::cpu::context::QFpuContext>() + 3 * size_of::<u32>();
 
-            let ucontext_addr = alloc_aligned_in_user_stack(
-                stack_pointer,
-                size_of::<ucontext_t>() + FP_STATE_SIZE,
-                align_of::<ucontext_t>(),
-            );
-            let fpu_context_addr = (ucontext_addr as usize) + size_of::<ucontext_t>();
+            user_space.write_bytes(fpu_context_addr as _, fpu_context_bytes)?;
+            user_space.write_val(ucontext_addr as _, &ucontext)?;
+
+            // Align the SP to the 16-byte boundary. This is required by the x86-64 ABI before
+            // calling any function.
+            stack_pointer = ucontext_addr.align_down(16);
         } else if #[cfg(target_arch = "loongarch64")] {
+            // 1. Write `siginfo_t`.
+            stack_pointer = alloc_aligned_in_user_stack(
+                stack_pointer,
+                size_of::<siginfo_t>(),
+                align_of::<siginfo_t>(),
+            );
+            user_space.write_val(stack_pointer as _, &sig_info)?;
+            siginfo_addr = stack_pointer;
+
+            // 2. Write `ucontext_t`.
             // FIXME: It seems that we need to allocate an `sctx_info` structure.
             // Reference: <https://elixir.bootlin.com/linux/v6.15.7/source/arch/loongarch/kernel/signal.c#L848>
-            let ucontext_addr = alloc_aligned_in_user_stack(
+            ucontext_addr = alloc_aligned_in_user_stack(
                 stack_pointer,
                 size_of::<ucontext_t>() + fpu_context_bytes.len(),
                 align_of::<ucontext_t>(),
@@ -409,17 +443,15 @@ pub fn handle_user_signal(
             // TODO: Set the flags in the context structure.
             // Reference: <https://elixir.bootlin.com/linux/v6.15.7/source/arch/loongarch/kernel/signal.c#L805>
             let fpu_context_addr = (ucontext_addr as usize) + size_of::<ucontext_t>();
+
+            user_space.write_bytes(fpu_context_addr as _, fpu_context_bytes)?;
+            user_space.write_val(ucontext_addr as _, &ucontext)?;
+
+            stack_pointer = ucontext_addr.align_down(16);
         } else {
             compile_error!("unsupported target");
         }
     }
-
-    user_space.write_bytes(fpu_context_addr as _, fpu_context_bytes)?;
-    user_space.write_val(ucontext_addr as _, &ucontext)?;
-
-    // Align the SP to the 16-byte boundary. This is required by the x86-64 ABI before calling any
-    // function.
-    stack_pointer = ucontext_addr.align_down(16);
 
     // 3. Write the address of the restorer code.
     let retaddr = if flags.contains(SigActionFlags::SA_RESTORER) {
@@ -457,10 +489,18 @@ pub fn handle_user_signal(
     user_ctx.set_instruction_pointer(handler_addr as _);
     user_ctx.set_stack_pointer(stack_pointer as usize);
     // Set parameters of the signal handler.
-    if flags.contains(SigActionFlags::SA_SIGINFO) {
-        user_ctx.set_arguments(sig_num, siginfo_addr as usize, ucontext_addr as usize);
-    } else {
-        user_ctx.set_arguments(sig_num, 0, 0);
+    cfg_if::cfg_if! {
+        if #[cfg(target_arch = "riscv64")] {
+            // Linux RISC-V always provides `siginfo` and `ucontext` in a1/a2,
+            // even for traditional one-argument handlers.
+            user_ctx.set_arguments(sig_num, siginfo_addr as usize, ucontext_addr as usize);
+        } else {
+            if flags.contains(SigActionFlags::SA_SIGINFO) {
+                user_ctx.set_arguments(sig_num, siginfo_addr as usize, ucontext_addr as usize);
+            } else {
+                user_ctx.set_arguments(sig_num, 0, 0);
+            }
+        }
     }
     // Perform CPU architecture-dependent logic.
     cfg_if::cfg_if! {

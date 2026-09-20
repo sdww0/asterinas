@@ -2,7 +2,7 @@
 
 //! Power management.
 
-use crate::power::{ExitCode, inject_poweroff_handler, inject_restart_handler};
+use crate::power::{inject_poweroff_handler, inject_restart_handler, ExitCode};
 
 fn try_poweroff(code: ExitCode) {
     let _ = match code {

@@ -4,7 +4,7 @@
 use ostd::arch::cpu::context::CpuException;
 #[cfg(target_arch = "loongarch64")]
 use ostd::arch::cpu::context::CpuExceptionInfo as CpuException;
-use ostd::{arch::cpu::context::UserContext, task::Task};
+use ostd::{arch::cpu::context::UserContext, task::Task, user::UserContextApi};
 
 use crate::{
     prelude::*,
@@ -23,9 +23,46 @@ pub(super) fn handle_exception(ctx: &Context, user_ctx: &UserContext, exception:
         }
     }
 
+    log_unhandled_user_exception_context(user_ctx);
+
     // We cannot handle most exceptions. Send a fault signal to the current thread before returning
     // to user space.
     generate_fault_signal(exception, ctx, user_ctx);
+}
+
+#[cfg(target_arch = "riscv64")]
+fn log_unhandled_user_exception_context(user_ctx: &UserContext) {
+    let regs = user_ctx.general_regs();
+    warn!(
+        "unhandled user exception context: sepc={:#x}, ra={:#x}, sp={:#x}, gp={:#x}, tp={:#x}, \
+         t0={:#x}, t1={:#x}, t2={:#x}, a0={:#x}, a1={:#x}, a2={:#x}, a3={:#x}, \
+         a4={:#x}, a5={:#x}, a6={:#x}, a7={:#x}",
+        user_ctx.instruction_pointer(),
+        regs.ra,
+        regs.sp,
+        regs.gp,
+        regs.tp,
+        regs.t0,
+        regs.t1,
+        regs.t2,
+        regs.a0,
+        regs.a1,
+        regs.a2,
+        regs.a3,
+        regs.a4,
+        regs.a5,
+        regs.a6,
+        regs.a7
+    );
+}
+
+#[cfg(not(target_arch = "riscv64"))]
+fn log_unhandled_user_exception_context(user_ctx: &UserContext) {
+    warn!(
+        "unhandled user exception context: ip={:#x}, sp={:#x}",
+        user_ctx.instruction_pointer(),
+        user_ctx.stack_pointer()
+    );
 }
 
 /// Handles the page fault occurs in the VMAR.

@@ -3,7 +3,7 @@
 use bitflags::bitflags;
 
 use super::{
-    c_types::sigaction_t,
+    c_types::{sigaction_t, sigset_t},
     constants::*,
     sig_mask::{SigMask, SigSet},
     sig_num::SigNum,
@@ -30,11 +30,14 @@ impl From<sigaction_t> for SigAction {
             SIG_DFL => SigAction::Dfl,
             SIG_IGN => SigAction::Ign,
             _ => {
-                let flags = SigActionFlags::from_bits_truncate(input.flags);
+                let flags = SigActionFlags::from_bits_truncate(input.flags as u32);
                 let mask = SigSet::from(input.mask);
                 SigAction::User {
                     handler_addr: input.handler_ptr,
                     flags,
+                    #[cfg(target_arch = "riscv64")]
+                    restorer_addr: 0,
+                    #[cfg(not(target_arch = "riscv64"))]
                     restorer_addr: input.restorer_ptr,
                     mask,
                 }
@@ -46,32 +49,45 @@ impl From<sigaction_t> for SigAction {
 impl SigAction {
     pub fn as_c_type(&self) -> sigaction_t {
         match self {
-            SigAction::Dfl => sigaction_t {
-                handler_ptr: SIG_DFL,
-                flags: 0,
-                restorer_ptr: 0,
-                mask: 0,
-                ..Default::default()
-            },
-            SigAction::Ign => sigaction_t {
-                handler_ptr: SIG_IGN,
-                flags: 0,
-                restorer_ptr: 0,
-                mask: 0,
-                ..Default::default()
-            },
+            SigAction::Dfl => Self::make_c_type(SIG_DFL, 0, 0, 0),
+            SigAction::Ign => Self::make_c_type(SIG_IGN, 0, 0, 0),
             SigAction::User {
                 handler_addr,
                 flags,
                 restorer_addr,
                 mask,
-            } => sigaction_t {
-                handler_ptr: *handler_addr,
-                flags: flags.as_u32(),
-                restorer_ptr: *restorer_addr,
-                mask: (*mask).into(),
-                ..Default::default()
-            },
+            } => Self::make_c_type(
+                *handler_addr,
+                flags.as_u32() as u64,
+                *restorer_addr,
+                (*mask).into(),
+            ),
+        }
+    }
+
+    fn make_c_type(
+        handler_ptr: Vaddr,
+        flags: u64,
+        restorer_ptr: Vaddr,
+        mask: sigset_t,
+    ) -> sigaction_t {
+        cfg_if::cfg_if! {
+            if #[cfg(target_arch = "riscv64")] {
+                let _ = restorer_ptr;
+                sigaction_t {
+                    handler_ptr,
+                    flags,
+                    mask,
+                }
+            } else {
+                sigaction_t {
+                    handler_ptr,
+                    flags,
+                    restorer_ptr,
+                    mask,
+                    ..Default::default()
+                }
+            }
         }
     }
 

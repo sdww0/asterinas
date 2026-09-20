@@ -75,6 +75,26 @@ macro_rules! copy_gp_regs {
     };
 }
 
+const RISCV_FP_STATE_SIZE: usize = 528;
+
+/// The user-visible RISC-V floating-point signal state.
+///
+/// Linux stores this union directly after the general-purpose registers inside
+/// `mcontext_t`, and user-space libc relies on that layout.
+#[repr(C, align(16))]
+#[derive(Clone, Copy, Debug, Pod)]
+pub struct FpState {
+    bytes: [u8; RISCV_FP_STATE_SIZE],
+}
+
+impl Default for FpState {
+    fn default() -> Self {
+        Self {
+            bytes: [0; RISCV_FP_STATE_SIZE],
+        }
+    }
+}
+
 /// Represents the context of a signal handler.
 ///
 /// This contains the context saved before a signal handler is invoked; it will be restored by
@@ -117,8 +137,7 @@ pub struct SigContext {
     t4: usize,
     t5: usize,
     t6: usize,
-    // In RISC-V, the signal stack layout places the FPU context directly
-    // after the general-purpose registers.
+    fp_state: FpState,
 }
 
 impl SigContext {
@@ -132,6 +151,14 @@ impl SigContext {
         let gp_regs = src.general_regs();
         copy_gp_regs!(gp_regs, self);
         self.pc = src.instruction_pointer();
+    }
+
+    pub fn copy_fpu_context_to(&self, dst: &mut [u8]) {
+        dst.copy_from_slice(&self.fp_state.bytes[..dst.len()]);
+    }
+
+    pub fn copy_fpu_context_from(&mut self, src: &[u8]) {
+        self.fp_state.bytes[..src.len()].copy_from_slice(src);
     }
 }
 

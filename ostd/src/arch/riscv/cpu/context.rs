@@ -13,8 +13,8 @@ use riscv::{
 
 use crate::{
     arch::{
-        cpu::extension::{IsaExtensions, has_extensions},
-        trap::{RawUserContext, SSTATUS_FS_MASK, TrapFrame, handle_irq},
+        cpu::extension::{has_extensions, IsaExtensions},
+        trap::{handle_irq, RawUserContext, TrapFrame, SSTATUS_FS_MASK},
     },
     cpu::PrivilegeLevel,
     user::{ReturnReason, UserContextApi, UserContextApiInternal},

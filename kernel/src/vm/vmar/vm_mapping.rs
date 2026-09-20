@@ -330,6 +330,10 @@ impl VmMapping {
     fn is_cow(&self) -> bool {
         !self.is_shared && self.perms.contains(VmPerms::MAY_WRITE)
     }
+
+    pub(in crate::vm::vmar) fn is_shared(&self) -> bool {
+        self.is_shared
+    }
 }
 
 /****************************** Page faults **********************************/
@@ -1002,7 +1006,7 @@ fn try_merge(left: &VmMapping, right: &VmMapping) -> Option<VmMapping> {
     })
 }
 
-fn duplicate_frame(src: &UFrame) -> Result<Frame<()>> {
+pub(in crate::vm::vmar) fn duplicate_frame(src: &UFrame) -> Result<Frame<()>> {
     let new_frame = FrameAllocOptions::new().zeroed(false).alloc_frame()?;
     new_frame.writer().write(&mut src.reader());
     Ok(new_frame)

@@ -16,7 +16,7 @@ pub(super) use trap::{RawUserContext, SSTATUS_FS_MASK, SSTATUS_SUM};
 use crate::{
     arch::{
         cpu::context::CpuException,
-        irq::{HwIrqLine, IRQ_CHIP, InterruptSource, disable_local, enable_local},
+        irq::{disable_local, enable_local, HwIrqLine, InterruptSource, IRQ_CHIP},
         timer::TIMER_IRQ,
     },
     cpu::PrivilegeLevel,

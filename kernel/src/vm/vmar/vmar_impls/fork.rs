@@ -5,15 +5,20 @@ use core::array;
 use aster_util::per_cpu_counter::PerCpuCounter;
 use ostd::{
     mm::{
-        CachePolicy, PageFlags, VmSpace,
+        PageFlags,
+        VmSpace,
         tlb::TlbFlushOp,
         vm_space::{CursorMut, VmQueriedItem},
     },
     task::disable_preempt,
 };
+#[cfg(not(target_arch = "riscv64"))]
+use ostd::mm::CachePolicy;
 
 use super::{RssDelta, VMAR_CAP_ADDR, VMAR_LOWEST_ADDR, Vmar, VmarInner};
 use crate::{prelude::*, process::ProcessVm};
+#[cfg(target_arch = "riscv64")]
+use crate::vm::vmar::vm_mapping::duplicate_frame;
 
 impl Vmar {
     /// Creates a new VMAR whose content is inherited from another
@@ -53,6 +58,15 @@ impl Vmar {
                 cur_cursor.jump(base).unwrap();
                 new_cursor.jump(base).unwrap();
 
+                #[cfg(target_arch = "riscv64")]
+                let num_copied = eager_copy_pt(
+                    &mut cur_cursor,
+                    &mut new_cursor,
+                    vm_mapping.map_size(),
+                    vm_mapping.is_shared(),
+                )?;
+
+                #[cfg(not(target_arch = "riscv64"))]
                 let num_copied =
                     cow_copy_pt(&mut cur_cursor, &mut new_cursor, vm_mapping.map_size());
 
@@ -68,6 +82,65 @@ impl Vmar {
     }
 }
 
+/// Eagerly copies RAM mappings instead of setting up COW.
+///
+/// Zion currently runs RISC-V guests in an environment where relying on fork-time
+/// write-protect/COW can leave parent and child mappings insufficiently isolated.
+/// Keep the generic COW path for other architectures, and use this conservative
+/// copy path for RISC-V until the lower-level COW invalidation path is fixed.
+#[cfg(target_arch = "riscv64")]
+fn eager_copy_pt(
+    src: &mut CursorMut<'_>,
+    dst: &mut CursorMut<'_>,
+    size: usize,
+    shared: bool,
+) -> Result<usize> {
+    let start_va = src.virt_addr();
+    let end_va = start_va + size;
+    let mut remain_size = size;
+
+    let mut num_copied = 0;
+
+    while let Some(mapped_va) = src.find_next(remain_size) {
+        let (va, Some(item)) = src.query().unwrap() else {
+            panic!("Found mapped page but query failed");
+        };
+        debug_assert_eq!(mapped_va, va.start);
+
+        match item {
+            VmQueriedItem::MappedRam { frame, mut prop } => {
+                prop.flags |= PageFlags::ACCESSED;
+                if prop.flags.contains(PageFlags::W) {
+                    prop.flags |= PageFlags::DIRTY;
+                }
+
+                dst.jump(mapped_va).unwrap();
+                if shared {
+                    dst.map((*frame).clone(), prop);
+                } else {
+                    let new_frame = duplicate_frame(&frame)?;
+                    dst.map(new_frame.into(), prop);
+                }
+                src.jump(va.end).unwrap();
+
+                num_copied += 1;
+            }
+            VmQueriedItem::MappedIoMem { paddr, prop } => {
+                // For MMIO pages, find the corresponding `IoMem` and map it.
+                let (iomem, offset) = src.find_iomem_by_paddr(paddr).unwrap();
+                dst.jump(mapped_va).unwrap();
+                dst.map_iomem(iomem, prop, PAGE_SIZE, offset);
+
+                src.jump(mapped_va + PAGE_SIZE).unwrap();
+            }
+        }
+
+        remain_size = end_va - src.virt_addr();
+    }
+
+    Ok(num_copied)
+}
+
 /// Sets mappings in the source page table as read-only to trigger COW, and
 /// copies the mappings to the destination page table.
 ///
@@ -75,6 +148,7 @@ impl Vmar {
 /// `size`. The destination range starts from `dst`'s current position.
 ///
 /// The number of physical frames copied is returned.
+#[cfg(not(target_arch = "riscv64"))]
 fn cow_copy_pt(src: &mut CursorMut<'_>, dst: &mut CursorMut<'_>, size: usize) -> usize {
     let start_va = src.virt_addr();
     let end_va = start_va + size;

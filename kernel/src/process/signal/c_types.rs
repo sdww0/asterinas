@@ -20,10 +20,19 @@ pub type clock_t = i64;
 #[padding_struct]
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, Pod)]
+#[cfg(not(target_arch = "riscv64"))]
 pub struct sigaction_t {
     pub handler_ptr: Vaddr,
-    pub flags: u32,
+    pub flags: u64,
     pub restorer_ptr: Vaddr,
+    pub mask: sigset_t,
+}
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, Pod)]
+#[cfg(target_arch = "riscv64")]
+pub struct sigaction_t {
+    pub handler_ptr: Vaddr,
+    pub flags: u64,
     pub mask: sigset_t,
 }
 
@@ -265,12 +274,15 @@ pub struct mcontext_t {
 impl mcontext_t {
     pub fn copy_user_regs_to(&self, context: &mut UserContext);
     pub fn copy_user_regs_from(&mut self, context: &UserContext);
+    #[cfg(target_arch = "riscv64")]
+    pub fn copy_fpu_context_to(&self, dst: &mut [u8]);
+    #[cfg(target_arch = "riscv64")]
+    pub fn copy_fpu_context_from(&mut self, src: &[u8]);
     #[cfg(target_arch = "x86_64")]
     pub fn fpu_context_addr(&self) -> Vaddr;
     #[cfg(target_arch = "x86_64")]
     pub fn set_fpu_context_addr(&mut self, addr: Vaddr);
 }
-
 #[repr(C)]
 #[derive(Clone, Copy, Pod)]
 pub struct _sigev_thread {

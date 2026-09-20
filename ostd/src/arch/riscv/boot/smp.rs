@@ -5,7 +5,7 @@
 use core::arch::global_asm;
 
 use crate::{
-    boot::smp::{PerApRawInfo, ap_early_entry},
+    boot::smp::{ap_early_entry, PerApRawInfo},
     cpu_local_cell,
     mm::{Paddr, Vaddr},
 };

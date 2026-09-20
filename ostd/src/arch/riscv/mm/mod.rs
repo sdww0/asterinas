@@ -10,15 +10,15 @@ pub(crate) use util::{
 use crate::{
     arch::{
         boot::DEVICE_TREE,
-        cpu::extension::{IsaExtensions, has_extensions},
+        cpu::extension::{has_extensions, IsaExtensions},
     },
     mm::{
-        PAGE_SIZE, Paddr, PagingConstsTrait, PagingLevel, PodOnce, Vaddr,
         dma::DmaDirection,
         page_prop::{
             CachePolicy, PageFlags, PageProperty, PageTableFlags, PrivilegedPageFlags as PrivFlags,
         },
         page_table::{PteScalar, PteTrait},
+        Paddr, PagingConstsTrait, PagingLevel, PodOnce, Vaddr, PAGE_SIZE,
     },
 };
 

@@ -9,12 +9,24 @@ use ostd::{
 use super::SyscallReturn;
 use crate::{
     prelude::*,
-    process::{posix_thread::ContextPthreadAdminApi, signal::c_types::ucontext_t},
+    process::{
+        posix_thread::ContextPthreadAdminApi,
+        signal::c_types::{siginfo_t, ucontext_t},
+    },
     syscall::sigaltstack::set_new_stack,
 };
 
 pub fn sys_rt_sigreturn(ctx: &Context, user_ctx: &mut UserContext) -> Result<SyscallReturn> {
-    let sig_context_addr = user_ctx.stack_pointer() as Vaddr;
+    let sig_context_addr = {
+        let stack_pointer = user_ctx.stack_pointer() as Vaddr;
+        cfg_if::cfg_if! {
+            if #[cfg(target_arch = "riscv64")] {
+                stack_pointer + size_of::<siginfo_t>()
+            } else {
+                stack_pointer
+            }
+        }
+    };
     debug!(
         "sys_rt_sigreturn: sig_context_addr = {:#x}",
         sig_context_addr
@@ -36,18 +48,28 @@ pub fn sys_rt_sigreturn(ctx: &Context, user_ctx: &mut UserContext) -> Result<Sys
     cfg_if::cfg_if! {
         if #[cfg(target_arch = "x86_64")] {
             let fpu_context_addr = ucontext.uc_mcontext.fpu_context_addr();
-        } else if #[cfg(any(target_arch = "riscv64", target_arch = "loongarch64"))] {
-            // In RISC-V/LoongArch64, the FPU context is placed directly after `ucontext_t` on the
-            // signal stack.
+            let mut fpu_context = FpuContext::new();
+            ctx.user_space()
+                .read_bytes(fpu_context_addr, fpu_context.as_bytes_mut())?;
+            ctx.thread_local.fpu().set_context(fpu_context);
+        } else if #[cfg(target_arch = "riscv64")] {
+            let mut fpu_context = FpuContext::new();
+            ucontext
+                .uc_mcontext
+                .copy_fpu_context_to(fpu_context.as_bytes_mut());
+            ctx.thread_local.fpu().set_context(fpu_context);
+        } else if #[cfg(target_arch = "loongarch64")] {
+            // In the current LoongArch implementation, the FPU context is placed directly after
+            // `ucontext_t` on the signal stack.
             let fpu_context_addr = sig_context_addr + size_of::<ucontext_t>();
+            let mut fpu_context = FpuContext::new();
+            ctx.user_space()
+                .read_bytes(fpu_context_addr, fpu_context.as_bytes_mut())?;
+            ctx.thread_local.fpu().set_context(fpu_context);
         } else {
             compile_error!("unsupported target");
         }
     }
-    let mut fpu_context = FpuContext::new();
-    ctx.user_space()
-        .read_bytes(fpu_context_addr, fpu_context.as_bytes_mut())?;
-    ctx.thread_local.fpu().set_context(fpu_context);
 
     // Restore the signal mask.
     let sig_mask = ucontext.uc_sigmask;

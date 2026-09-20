@@ -255,6 +255,7 @@ impl<D: DmaDirection> Drop for DmaSegment<D> {
         // Keep the same lock order as `pool.alloc_segment`
         // Lock order: pool.avail_pages -> pool.all_pages -> page.allocated_segments
         let mut avail_pages = pool.avail_pages.lock();
+        #[cfg(not(target_arch = "riscv64"))]
         let mut all_pages = pool.all_pages.lock();
 
         let mut allocated_segments = page.allocated_segments.lock();
@@ -268,11 +269,15 @@ impl<D: DmaDirection> Drop for DmaSegment<D> {
 
         let became_free = allocated_segments.not_any();
 
+        #[cfg(not(target_arch = "riscv64"))]
         if became_free && all_pages.len() > pool.high_watermark {
             avail_pages.retain(|page_| !Arc::ptr_eq(page_, &page));
             all_pages.retain(|page_| !Arc::ptr_eq(page_, &page));
             return;
         }
+
+        #[cfg(target_arch = "riscv64")]
+        let _ = became_free;
 
         if became_avail {
             avail_pages.push_back(page.clone());
