@@ -172,6 +172,9 @@ pub(crate) unsafe fn activate_page_table(root_paddr: Paddr, _root_pt_cache: Cach
     unsafe {
         riscv::register::satp::set(mode, 0, ppn);
     }
+    // All user address spaces currently use ASID 0. A satp write alone does
+    // not invalidate cached translations, so flush before using the new root.
+    riscv::asm::sfence_vma_all();
 }
 
 pub(crate) fn current_page_table_paddr() -> Paddr {
